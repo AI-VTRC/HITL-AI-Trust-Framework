@@ -1,0 +1,2 @@
+Best Labels for New Data to collect from:
+Person, Desk, Computer monitor, Office Chair, Chair, Poster, Woman, Man, Backpack, Handbag, Glasses, Mobile phone, Dog, Cat, Coffee, Bus, Car, Traffic light, Bird, Traffic sign, Computer keyboard, Computer hardware, Building, Commercial building, Sidewalk, Crowd, Lighting, Sunlight
