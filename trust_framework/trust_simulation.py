@@ -108,7 +108,7 @@ def assess_trust(image_path, previous_trust_score, trust_scores, cav_name):
 
 
 # Function to process and classify an image using ResNet for scene classification
-def classify_image(image_path):
+def classify_image_original(image_path):
     classification_model = ResNet101V2(weights='imagenet')
 
     # Load and preprocess the image
@@ -127,7 +127,7 @@ def classify_image(image_path):
 
 
 # Function to process and classify an image using ResNet for scene classification
-def classify_image_original(image_path, model_classification):
+def classify_image(image_path, model_classification):
     # Load and preprocess the image
     img = cv2.imread(image_path)
     if img is None or img.size == 0:
@@ -171,10 +171,15 @@ def classify_image_original(image_path, model_classification):
     labels_result = [labels[idx] for idx in top_indices[0]]
     confidences = [conf.item() for conf in top_confidences[0]]
 
+    scene_classification = {}
+    for i in range(len(labels_result)):
+        scene_classification[labels_result[i]] = confidences[i]
+
     # Return the top scene classification results (top_confidences and top_indices)
-    # Outputs: (['minivan', 'parking meter', 'taxicab', 'traffic sign', 'pole', 'grille', 'car wheel', 'unicycle', 'limousine', 'flagpole', 'traffic light', 'moving van', 'station wagon', 'shopping cart', 'breakwater', 'waste container', 'vacuum cleaner', 'tow truck', 'pulled rickshaw', 'crutch'],
-    # [12.189608573913574, 9.94248104095459, 7.718068599700928, 7.495006561279297, 7.2986159324646, 6.602363109588623, 6.36437463760376, 6.278500556945801, 5.975265026092529, 5.890300750732422, 5.677545547485352, 5.58784818649292, 5.200868606567383, 5.1274733543396, 5.033421516418457, 5.0144267082214355, 4.856858253479004, 4.7361931800842285, 4.6941046714782715, 4.548593997955322])
-    return labels_result, confidences
+    first_key = list(scene_classification.keys())[0]
+    first_value = scene_classification[first_key]
+
+    return first_key, first_value
 
 
 # Function to perform object detection using your specific object detection model
@@ -204,10 +209,11 @@ def detect_objects(image_path):
 
 # Class definition for CAV
 class ConnectedAutonomousVehicle:
-    def __init__(self, name, trust_scores, detected_objects):
+    def __init__(self, name, trust_scores, detected_objects=None):
         self.name = name
-        self.trust_scores = trust_scores
-        self.detected_objects = detected_objects
+        self.trust_scores = trust_scores if trust_scores else {}
+        self.detected_objects = detected_objects if detected_objects else []
+        self.shared_info = {}
 
     def assess_trust(self, cav_name):
         # Simulate trust assessment based on the DC trust model
@@ -241,15 +247,19 @@ class ConnectedAutonomousVehicle:
         )
 
         # Check trust with other CAVs and update trust accordingly
-        for other_cav_name, trust_score in self.trust_scores.items():
-            if other_cav_name != cav_name:
-                trust_score_a = updated_trust_score
-                trust_score_b = trust_score
-                if trust_score_a[0] < trust_threshold and trust_score_b[0] >= trust_threshold and trust_score_b[
-                    0] < 1.0:
-                    updated_trust_score = (
-                        0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
+        if isinstance(self.trust_scores, dict):
+            for other_cav_name, trust_score in self.trust_scores.items():
+                if other_cav_name != cav_name:
+                    trust_score_a = updated_trust_score
+                    trust_score_b = trust_score
+                    if trust_score_a[0] < trust_threshold and trust_score_b[0] >= trust_threshold and trust_score_b[
+                        0] < 1.0:
+                        updated_trust_score = (
+                            0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
+        else:
+            print(f"Expected a dict, but got {type(self.trust_scores)}: {self.trust_scores}")
 
+        # this should be a single numeric value, not a tuple
         return updated_trust_score
 
     def share_info(self, other_cav, field_of_view):
@@ -257,7 +267,7 @@ class ConnectedAutonomousVehicle:
         image_path = field_of_view  # Replace with the actual path to the image
 
         # Simulate scene classification
-        scene_label, confidence = classify_image(image_path, model_object_detection)
+        scene_label, confidence = classify_image(image_path, model_classification)
         shared_info = {'scene_label': scene_label, 'confidence': confidence}
 
         # Simulate object detection (replace with your object detection logic)
@@ -326,6 +336,7 @@ def main():
         ) for i in range(1, 5)
     ]
 
+    # Set directory for initial Field of View capture for each of the 4 simulated CAVs
     os.chdir(r'trust_framework/school_data/street/')
     image_paths = [
         'street_1.jpeg',
@@ -348,11 +359,11 @@ def main():
             cav.name
         )
 
+        # Object Detection
+        cav.detected_objects = detect_objects(image_path)
+
         # Classify Image
         labels, confidences = classify_image(image_path, model_classification)
-
-        # Object Detection
-        detected_objects = detect_objects(image_path)
 
         # Sharing information with other CAVs in the network
         for other_cav in cavs:
@@ -360,7 +371,7 @@ def main():
                 cav.share_info(other_cav, image_path)
 
         print(f"Trust Scores for {cav.name} are {cav.trust_scores}")
-        print(f"Detected Objects by {cav.name} are {detected_objects}")
+        print(f"Detected Objects by {cav.name} are {cav.detected_objects}")
         print(f"Classified Labels for {cav.name} are {labels} with confidences {confidences}")
 
     # Print Final Trust Recommendations
