@@ -1,17 +1,21 @@
 import cv2
 import os
+import json
 import numpy as np
 import random
+import torch
+import requests
 from PIL import Image
-
-# Load the pre-trained ResNet101 model for scene classification
-# Replace this with specific model import
+import torchvision.transforms as transforms
+from ultralytics import YOLO
 from tensorflow.keras.applications.resnet_v2 import ResNet101V2, preprocess_input, decode_predictions
 
-# Load the pre-trained object detection model (assuming it's a separate model)
-# Replace this with specific object detection model import and initialization
-# For example, use TensorFlow's Object Detection API or another object detection framework
-object_detection_model = ResNet101V2(weights='imagenet')
+# Load the pre-trained multi-label classification model (original model from the paper)
+model_classification = torch.hub.load('facebookresearch/WSL-Images', 'resnext101_32x48d_wsl')
+model_classification.eval()  # Set the classification model to evaluation mode
+
+# Load the pre-trained object detection model (original model was YOLOv3 from the paper)
+model_object_detection = YOLO('yolov8n.pt')
 
 # Define the trust threshold
 trust_threshold = 0.5
@@ -104,7 +108,9 @@ def assess_trust(image_path, previous_trust_score, trust_scores, cav_name):
 
 
 # Function to process and classify an image using ResNet for scene classification
-def classify_image(image_path, object_detection_model):
+def classify_image(image_path):
+    classification_model = ResNet101V2(weights='imagenet')
+
     # Load and preprocess the image
     img = cv2.imread(image_path)
     img = cv2.resize(img, (224, 224))  # Resize to the input size expected by ResNet101
@@ -112,30 +118,86 @@ def classify_image(image_path, object_detection_model):
     img = preprocess_input(img)  # Preprocess the image
 
     # Perform scene classification
-    predictions = object_detection_model.predict(img)
+    predictions = classification_model.predict(img)
     decoded_predictions = decode_predictions(predictions, top=1)[0]
 
     # Return the top scene classification result and confidence
+    # Outputs: ('fountain', 0.23353487)
     return decoded_predictions[0][1], decoded_predictions[0][2]
+
+
+# Function to process and classify an image using ResNet for scene classification
+def classify_image_original(image_path, model_classification):
+    # Load and preprocess the image
+    img = cv2.imread(image_path)
+    if img is None or img.size == 0:
+        raise ValueError(f"Failed to load image or invalid image dimensions at path: {image_path}")
+
+    preprocess_classification = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+
+    original_image = img.copy()  # Make a copy for visualization
+    original_image_rgb = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)  # Convert image to RGB
+    image = Image.fromarray(original_image_rgb)  # Convert NumPy array to PIL image
+    image = preprocess_classification(image)
+    image = image.unsqueeze(0)  # Add a batch dimension
+
+    # Perform inference for image classification
+    with torch.no_grad():
+        outputs_classification = model_classification(image)
+
+    # Try to Load class labels locally first, if not available fetch from URL
+    try:
+        with open('imagenet-simple-labels.json', 'r') as f:
+            labels = json.load(f)
+    except FileNotFoundError:
+        LABELS_URL = 'https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json'
+        response = requests.get(LABELS_URL)
+        if response.status_code != 200:
+            raise ConnectionError(f"Failed to fetch labels from {LABELS_URL}")
+        labels = response.json()
+
+    # Get the predicted class index and label
+    _, predicted_idx_classification = torch.max(outputs_classification, 1)
+
+    # Output the top 20 labels and their confidences
+    top_k = 20
+    top_confidences, top_indices = torch.topk(outputs_classification, top_k, 1)
+
+    labels_result = [labels[idx] for idx in top_indices[0]]
+    confidences = [conf.item() for conf in top_confidences[0]]
+
+    # Return the top scene classification results (top_confidences and top_indices)
+    # Outputs: (['minivan', 'parking meter', 'taxicab', 'traffic sign', 'pole', 'grille', 'car wheel', 'unicycle', 'limousine', 'flagpole', 'traffic light', 'moving van', 'station wagon', 'shopping cart', 'breakwater', 'waste container', 'vacuum cleaner', 'tow truck', 'pulled rickshaw', 'crutch'],
+    # [12.189608573913574, 9.94248104095459, 7.718068599700928, 7.495006561279297, 7.2986159324646, 6.602363109588623, 6.36437463760376, 6.278500556945801, 5.975265026092529, 5.890300750732422, 5.677545547485352, 5.58784818649292, 5.200868606567383, 5.1274733543396, 5.033421516418457, 5.0144267082214355, 4.856858253479004, 4.7361931800842285, 4.6941046714782715, 4.548593997955322])
+    return labels_result, confidences
 
 
 # Function to perform object detection using your specific object detection model
 def detect_objects(image_path):
-    # Load and preprocess the image
-    img = cv2.imread(image_path)
-    img = cv2.resize(img, (224, 224))  # Resize to the input size expected by ResNet101V2
-    img = np.expand_dims(img, axis=0)  # Add batch dimension
-    img = preprocess_input(img)  # Preprocess the image
+    # Perform object detection using YOLO
+    results = model_object_detection(image_path)
 
-    # Perform object detection using ResNet101V2
-    predictions = object_detection_model.predict(img)
+    # Process YOLO predictions to extract object information
+    detected_objects = []
 
-    # Decode the object detection results and extract relevant information
-    decoded_predictions = decode_predictions(predictions)
+    # Iterate over the results
+    for result in results:
+        # Extracting labels, confidences, and boxes
+        for box in result.boxes:
+            label_index = box.cls.item()  # Get class label as the index
+            label_name = result.names[label_index]  # Map index to the corresponding name
 
-    # You should extract object labels, locations, and confidences from decoded_predictions
-    # Example: [{'label': 'car', 'location': (x, y), 'confidence': 0.95}, ...]
-    detected_objects = []  # Replace with your object detection results
+            output = {
+                'label': label_name,  # Replace with the mapped name
+                'confidence': box.conf.item(),  # Confidence score of the detection
+                'box': box.xyxy.cpu().tolist()  # Coordinates of the bounding box
+            }
+            detected_objects.append(output)  # Append each object inside the inner loop
 
     return detected_objects
 
@@ -146,7 +208,6 @@ class ConnectedAutonomousVehicle:
         self.name = name
         self.trust_scores = trust_scores
         self.detected_objects = detected_objects
-        self.image_path = None
 
     def assess_trust(self, cav_name):
         # Simulate trust assessment based on the DC trust model
@@ -187,20 +248,20 @@ class ConnectedAutonomousVehicle:
                 if trust_score_a[0] < trust_threshold and trust_score_b[0] >= trust_threshold and trust_score_b[
                     0] < 1.0:
                     updated_trust_score = (
-                    0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
+                        0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
 
         return updated_trust_score
 
-    def share_info(self, other_cav):
+    def share_info(self, other_cav, field_of_view):
         # Simulate capturing an image (Should replace this with capturing a real image)
-        self.image_path = 'path_to_image_for_' + self.name  # Replace with the actual path to the image
+        image_path = field_of_view  # Replace with the actual path to the image
 
         # Simulate scene classification
-        scene_label, confidence = classify_image(self.image_path, object_detection_model)
+        scene_label, confidence = classify_image(image_path, model_object_detection)
         shared_info = {'scene_label': scene_label, 'confidence': confidence}
 
         # Simulate object detection (replace with your object detection logic)
-        detected_objects = detect_objects(self.image_path)
+        detected_objects = detect_objects(image_path)
         shared_info['detected_objects'] = detected_objects
 
         # Simulate information reception by other CAV and trust assessment
@@ -212,7 +273,7 @@ class ConnectedAutonomousVehicle:
         self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name)
 
         # Calculate overlap between FOVs (replace with your FOV logic)
-        overlap = calculate_overlap(self.image_path, other_cav.image_path)
+        overlap = calculate_overlap(image_path, other_cav.image_path)
 
         # Check if there is overlap between FOVs
         if overlap > 0.0:
@@ -252,45 +313,60 @@ class ConnectedAutonomousVehicle:
             trust_recommendations[self.name][other_cav.name] = self.trust_scores[other_cav.name]
 
 
-# Initialize trust scores for each CAV (use a dictionary)
-trust_scores = {f'cav{i}': (0.33, 0.33, 0.34) for i in range(1, 5)}  # Replace with your trust scores
+def main():
+    # List of CAV objects
+    trust_scores_init = {f'cav{i}': (0.33, 0.33, 0.34) for i in range(1, 5)}
+    detected_objects_init = {f'cav{i}': [] for i in range(1, 5)}
 
-# Initialize objects detected by each CAV (use a dictionary)
-detected_objects = {f'cav{i}': [] for i in range(1, 5)}  # Replace with your detected objects
+    cavs = [
+        ConnectedAutonomousVehicle(
+            name=f'cav{i}',
+            trust_scores=trust_scores_init[f'cav{i}'],
+            detected_objects=detected_objects_init[f'cav{i}']
+        ) for i in range(1, 5)
+    ]
 
-# Initialize CAV objects
-cav1 = ConnectedAutonomousVehicle(name='cav1', trust_scores=trust_scores['cav1'],
-                                  detected_objects=detected_objects['cav1'])
-cav2 = ConnectedAutonomousVehicle(name='cav2', trust_scores=trust_scores['cav2'],
-                                  detected_objects=detected_objects['cav2'])
-cav3 = ConnectedAutonomousVehicle(name='cav3', trust_scores=trust_scores['cav3'],
-                                  detected_objects=detected_objects['cav3'])
-cav4 = ConnectedAutonomousVehicle(name='cav4', trust_scores=trust_scores['cav4'],
-                                  detected_objects=detected_objects['cav4'])
+    os.chdir(r'trust_framework/school_data/street/')
+    image_paths = [
+        'street_1.jpeg',
+        'street_2.jpeg',
+        'street_3.jpeg',
+        'street_4.jpeg'
+    ]
 
-# List of CAV objects
-cavs = [cav1, cav2, cav3, cav4]
+    # Process images and assess trust for each CAV
+    for idx, cav in enumerate(cavs):
+        print(f"Processing {cav.name}")
 
-# Simulate image paths for each CAV (replace with your image paths)
-os.chdir(r'trust_framework/school_data/street/')
-image_paths = ['street_1.jpeg',
-               'street_2.jpeg',
-               'street_3.jpeg',
-               'street_4.jpeg']
+        image_path = image_paths[idx]
 
-# Process images and assess trust for each CAV
-for i, cav in enumerate(cavs):
-    # Share information with other CAVs
-    for other_cav in cavs:
-        if other_cav != cav:
-            cav.share_info(other_cav)
+        # Update Trust Scores with Assess Trust Function
+        cav.trust_scores = assess_trust(
+            image_path,
+            cav.trust_scores,
+            trust_scores_init,
+            cav.name
+        )
 
-    # Print trust scores for this CAV
-    print(f"Trust scores for {cav.name}: {cav.trust_scores}")
+        # Classify Image
+        labels, confidences = classify_image(image_path, model_classification)
 
-# Print trust recommendations
-print("Trust Recommendations:")
-for cav_name, recommendations in trust_recommendations.items():
-    print(f"{cav_name} recommends trusting:")
-    for other_cav, trust_score in recommendations.items():
-        print(f"{other_cav}: {trust_score}")
+        # Object Detection
+        detected_objects = detect_objects(image_path)
+
+        # Sharing information with other CAVs in the network
+        for other_cav in cavs:
+            if cav.name != other_cav.name:
+                cav.share_info(other_cav, image_path)
+
+        print(f"Trust Scores for {cav.name} are {cav.trust_scores}")
+        print(f"Detected Objects by {cav.name} are {detected_objects}")
+        print(f"Classified Labels for {cav.name} are {labels} with confidences {confidences}")
+
+    # Print Final Trust Recommendations
+    print("Final Trust Recommendations:")
+    print(json.dumps(trust_recommendations, indent=4))
+
+
+if __name__ == "__main__":
+    main()
