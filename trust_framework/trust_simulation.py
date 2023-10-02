@@ -25,22 +25,28 @@ trust_recommendations = {}
 
 
 # Function to calculate overlap between two bounding boxes
-def calculate_overlap(bbox1, bbox2):
-    x1, y1, w1, h1 = bbox1
-    x2, y2, w2, h2 = bbox2
+def calculate_overlap(bboxes1, bboxes2):
+    overlaps = []
+    for bbox1 in bboxes1:
+        for bbox2 in bboxes2:
+            x1, y1, x2, y2 = bbox1  # Unpack the coordinates of bbox1
+            x3, y3, x4, y4 = bbox2  # Unpack the coordinates of bbox2
 
-    left = max(x1, x2)
-    right = min(x1 + w1, x2 + w2)
-    top = max(y1, y2)
-    bottom = min(y1 + h1, y2 + h2)
+            left = max(x1, x3)
+            right = min(x2, x4)
+            top = max(y1, y3)
+            bottom = min(y2, y4)
 
-    if left < right and top < bottom:
-        intersection_area = (right - left) * (bottom - top)
-        area1 = w1 * h1
-        area2 = w2 * h2
-        return intersection_area / min(area1, area2)
-    else:
-        return 0.0
+            if left < right and top < bottom:
+                intersection_area = (right - left) * (bottom - top)
+                area1 = (x2 - x1) * (y2 - y1)
+                area2 = (x4 - x3) * (y4 - y3)
+                overlap = intersection_area / min(area1, area2)
+            else:
+                overlap = 0.0
+            overlaps.append(overlap)
+
+    return overlaps
 
 
 def are_objects_consistent(obj_1, obj_2):
@@ -62,49 +68,6 @@ def are_objects_consistent(obj_1, obj_2):
 
     # Objects are not consistent
     return False
-
-
-# Simulate trust assessments for each CAV
-def assess_trust(image_path, previous_trust_score, trust_scores, cav_name):
-    # Simulate trust assessment based on the DC trust model
-    # In this simplified example, we update trust based on received evidence and aij constant
-    # Replace this logic with specific trust assessment rules
-
-    # Generate random evidence counts (positive, negative, uncertain)
-    positive_evidence = random.randint(0, 10)
-    negative_evidence = random.randint(0, 10)
-    uncertain_evidence = random.randint(0, 10)
-
-    # Constants (aij) representing prior opinions (for example, based on hearsay)
-    aij = random.uniform(0, 1)
-
-    # Trust assessment logic
-    alpha_ij = positive_evidence + aij
-    beta_ij = negative_evidence + aij
-    gamma_ij = uncertain_evidence + aij
-
-    # Normalize the values to ensure they sum to 1
-    total_evidence = alpha_ij + beta_ij + gamma_ij
-    alpha_ij /= total_evidence
-    beta_ij /= total_evidence
-    gamma_ij /= total_evidence
-
-    # Combine the updated trust values with previous trust (trust fusion)
-    updated_trust_score = (
-        alpha_ij + previous_trust_score[0],
-        beta_ij + previous_trust_score[1],
-        gamma_ij + previous_trust_score[2]
-    )
-
-    # Check trust with other CAVs and update trust accordingly
-    for other_cav_name, trust_score in trust_scores.items():
-        if other_cav_name != cav_name:
-            trust_score_a = updated_trust_score
-            trust_score_b = trust_score
-            if trust_score_a[0] < 0.5 and trust_score_b[0] >= 0.5 and trust_score_b[0] < 1.0:
-                updated_trust_score = (0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
-
-    return updated_trust_score
 
 
 # Function to process and classify an image using ResNet for scene classification
@@ -209,8 +172,9 @@ def detect_objects(image_path):
 
 # Class definition for CAV
 class ConnectedAutonomousVehicle:
-    def __init__(self, name, trust_scores, detected_objects=None):
+    def __init__(self, name, fov, trust_scores, detected_objects=None):
         self.name = name
+        self.fov = fov
         self.trust_scores = trust_scores if trust_scores else {}
         self.detected_objects = detected_objects if detected_objects else []
         self.shared_info = {}
@@ -219,6 +183,8 @@ class ConnectedAutonomousVehicle:
         # Simulate trust assessment based on the DC trust model
         # In this simplified example, we update trust based on received evidence and aij constant
         # Replace this logic with specific trust assessment rules
+        if cav_name == self.name or cav_name not in self.trust_scores:
+            return {}
 
         # Generate random evidence counts (positive, negative, uncertain)
         positive_evidence = random.randint(0, 10)
@@ -226,41 +192,29 @@ class ConnectedAutonomousVehicle:
         uncertain_evidence = random.randint(0, 10)
 
         # Constants (aij) representing prior opinions (for example, based on hearsay)
-        aij = random.uniform(0, 1)  # Replace with your own values
+        aij = random.uniform(0, 1)
 
         # Trust assessment logic
-        alpha_ij = positive_evidence + aij
-        beta_ij = negative_evidence + aij
-        gamma_ij = uncertain_evidence + aij
+        alpha_ij = positive_evidence + aij * 10  # considering aij as a weight for pseudo count
+        beta_ij = negative_evidence + (1 - aij) * 10  # considering (1-aij) as a weight for pseudo count
+        gamma_ij = uncertain_evidence
 
-        # Normalize the values to ensure they sum to 1
-        total_evidence = alpha_ij + beta_ij + gamma_ij
-        alpha_ij /= total_evidence
-        beta_ij /= total_evidence
-        gamma_ij /= total_evidence
+        # Computing the trust value omega_ij as the expected value
+        total_count = alpha_ij + beta_ij + gamma_ij
+        omega_ij = alpha_ij / total_count  # Expected trust value (Trustworthiness)
 
-        # Combine the updated trust values with previous trust (trust fusion)
-        updated_trust_score = (
-            alpha_ij + self.trust_scores[0],
-            beta_ij + self.trust_scores[1],
-            gamma_ij + self.trust_scores[2]
-        )
+        # Trust fusion with other CAVs in the system
+        for other_cav_name, trust_score in self.trust_scores.items():
+            if other_cav_name != cav_name:
+                trust_score_a = omega_ij
+                trust_score_b = trust_score
+                if trust_score_a < trust_threshold and trust_threshold <= trust_score_b < 1.0:
+                    omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
-        # Check trust with other CAVs and update trust accordingly
-        if isinstance(self.trust_scores, dict):
-            for other_cav_name, trust_score in self.trust_scores.items():
-                if other_cav_name != cav_name:
-                    trust_score_a = updated_trust_score
-                    trust_score_b = trust_score
-                    if trust_score_a[0] < trust_threshold and trust_score_b[0] >= trust_threshold and trust_score_b[
-                        0] < 1.0:
-                        updated_trust_score = (
-                            0.6, 0.2, 0.2)  # Set trust_score_a[0] to a higher value to trust the other CAV
-        else:
-            print(f"Expected a dict, but got {type(self.trust_scores)}: {self.trust_scores}")
+        # Updating the trust score in the trust_scores dictionary
+        self.trust_scores[cav_name] = omega_ij
 
-        # this should be a single numeric value, not a tuple
-        return updated_trust_score
+        return omega_ij
 
     def share_info(self, other_cav, field_of_view):
         # Simulate capturing an image (Should replace this with capturing a real image)
@@ -282,14 +236,24 @@ class ConnectedAutonomousVehicle:
         # Assess trust and update trust scores
         self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name)
 
-        # Calculate overlap between FOVs (replace with your FOV logic)
-        overlap = calculate_overlap(image_path, other_cav.image_path)
+        # Get a list of all bounding boxes detected in FOV1
+        box_list1 = []
+        for i in range(0, len(self.detected_objects)):
+            box_list1.append(self.detected_objects[i]["box"])
+
+        # Get a list of all bounding boxes detected in FOV2
+        box_list2 = []
+        for i in range(0, len(other_cav.detected_objects)):
+            box_list2.append(other_cav.detected_objects[i]["box"])
+
+        # Calculate overlap between two FOVs
+        overlap = calculate_overlap(box_list1, box_list2)
 
         # Check if there is overlap between FOVs
-        if overlap > 0.0:
+        if overlap != 0.0:
             # Check consistency of objects detected by both CAVs
             objects_detected_by_current_cav = self.detected_objects
-            objects_detected_by_other_cav = received_info.get('detected_objects', [])
+            objects_detected_by_other_cav = other_cav.detected_objects
 
             consistent_objects = []
             for obj_1 in objects_detected_by_current_cav:
@@ -328,14 +292,6 @@ def main():
     trust_scores_init = {f'cav{i}': (0.33, 0.33, 0.34) for i in range(1, 5)}
     detected_objects_init = {f'cav{i}': [] for i in range(1, 5)}
 
-    cavs = [
-        ConnectedAutonomousVehicle(
-            name=f'cav{i}',
-            trust_scores=trust_scores_init[f'cav{i}'],
-            detected_objects=detected_objects_init[f'cav{i}']
-        ) for i in range(1, 5)
-    ]
-
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
     os.chdir(r'trust_framework/school_data/street/')
     image_paths = [
@@ -345,6 +301,15 @@ def main():
         'street_4.jpeg'
     ]
 
+    cavs = [
+        ConnectedAutonomousVehicle(
+            name=f'cav{i}',
+            fov=image_paths[i-1],
+            trust_scores=trust_scores_init[f'cav{i}'],
+            detected_objects=detected_objects_init[f'cav{i}']
+        ) for i in range(1, 5)
+    ]
+
     # Process images and assess trust for each CAV
     for idx, cav in enumerate(cavs):
         print(f"Processing {cav.name}")
@@ -352,18 +317,14 @@ def main():
         image_path = image_paths[idx]
 
         # Update Trust Scores with Assess Trust Function
-        cav.trust_scores = assess_trust(
-            image_path,
-            cav.trust_scores,
-            trust_scores_init,
-            cav.name
-        )
+        cav.trust_scores = cav.assess_trust(cav.name)
 
         # Object Detection
         cav.detected_objects = detect_objects(image_path)
 
         # Classify Image
         labels, confidences = classify_image(image_path, model_classification)
+        cav.shared_info = {'scene_label': labels, 'confidence': confidences}
 
         # Sharing information with other CAVs in the network
         for other_cav in cavs:
