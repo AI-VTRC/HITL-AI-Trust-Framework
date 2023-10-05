@@ -383,6 +383,7 @@ class ConnectedAutonomousVehicle:
             objects_detected_by_current_cav = self.detected_objects
             objects_detected_by_other_cav = other_cav.detected_objects
 
+            # INCLUDE logic that compares shared info as well.
             consistent_objects = []
             for obj_1 in objects_detected_by_current_cav:
                 for obj_2 in objects_detected_by_other_cav:
@@ -392,13 +393,13 @@ class ConnectedAutonomousVehicle:
                             consistent_objects.append(obj_1)
                             break
 
+            print(f"Overlap detected between {self.name} and {other_cav.name}.")
+            print(f"Detected objects shared by {self.name} include:")
+            for obj in consistent_objects:
+                print(obj)
+
             # Record consistent objects detected by both CAVs
             self.detected_objects += consistent_objects
-
-            # Update trust recommendations based on trust assessment
-            if self.name not in trust_recommendations:
-                trust_recommendations[self.name] = {}
-            trust_recommendations[self.name][other_cav.name] = self.trust_scores[other_cav.name]
 
             # Print objects and confidences between the two CAV images
             print(f"Overlap detected between {self.name} and {other_cav.name}.")
@@ -408,6 +409,12 @@ class ConnectedAutonomousVehicle:
             print(f"Detected objects by {other_cav.name}:")
             for obj in other_cav.detected_objects:
                 print(obj)
+
+            # Update trust recommendations based on trust assessment
+            if self.name not in trust_recommendations:
+                trust_recommendations[self.name] = {}
+            trust_recommendations[self.name][other_cav.name] = self.trust_scores[other_cav.name]
+
         else:
             # No FOV overlap, recommend trust to other CAV
             if self.name not in trust_recommendations:
@@ -421,7 +428,7 @@ def main():
     detected_objects_init = {f'cav{i}': [] for i in range(1, 5)}
 
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
-    os.chdir(r'trust_framework/school_data/street/')
+    os.chdir(r'school_data/street/')
     image_paths = [
         'street_1.jpeg',
         'street_2.jpeg',
@@ -454,7 +461,9 @@ def main():
         labels, confidences = classify_image(image_path, model_classification)
         cav.shared_info = {'scene_label': labels, 'confidence': confidences}
 
-        # ERROR HERE
+        # ERROR IN CONSISTENT OBJECTS
+        # No consistent objects are being recorded. CAV1 and CAV2 should have the same Minivan.
+        # CAV2 should have more cars.
         # TRUST SCORES ARE ALL COMING UP EMPTY FOR EACH OTHER. IOU THRESHOLD MIGHT NEED TO BE ADJUSTED.
         # Sharing information with other CAVs in the network
         for other_cav in cavs:
