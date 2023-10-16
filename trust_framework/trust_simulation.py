@@ -268,6 +268,19 @@ def detect_objects(image_path):
     return detected_objects
 
 
+# Convert tuples to desired dictionary format
+def tuple_to_dict(trust_tuples, cav_names, obj_index):
+    obj_dict = {}
+
+    # Get other objects except the current one
+    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1:]
+
+    for idx, other_obj in enumerate(other_objects):
+        obj_dict[other_obj] = trust_tuples[obj_index][idx]
+
+    return obj_dict
+
+
 # Class definition for CAV
 class ConnectedAutonomousVehicle:
     """
@@ -288,6 +301,7 @@ class ConnectedAutonomousVehicle:
         self.trust_scores = trust_scores if trust_scores else {}
         self.detected_objects = detected_objects if detected_objects else []
         self.shared_info = {}
+        
 
     def assess_trust(self, cav_name):
         """
@@ -306,7 +320,7 @@ class ConnectedAutonomousVehicle:
         # Simulate trust assessment based on the DC trust model
         # In this simplified example, we update trust based on received evidence and aij constant
         # Replace this logic with specific trust assessment rules
-        if cav_name == self.name or cav_name not in self.trust_scores:
+        if cav_name == self.name or cav_name in self.trust_scores:
             return {}
 
         # Generate random evidence counts (positive, negative, uncertain)
@@ -461,11 +475,16 @@ def main():
         ) for i in range(1, 5)
     ]
 
+    trust_scores_init = list(trust_scores_init.values())
+    cav_names = [cav.name for cav in cavs]
+
     # Process FOVs for each CAV at the current time.
     for idx, cav in enumerate(cavs):
         print(f"Processing {cav.name}")
 
         image_path = image_paths[idx]
+
+        cav.trust_scores = tuple_to_dict(trust_scores_init, cav_names, idx)
 
         # Object Detection
         cav.detected_objects = detect_objects(image_path)
@@ -481,6 +500,8 @@ def main():
                 # Update Trust Scores with Assess Trust Function
                 # ERROR HERE. THE ORIGINAL CAV TRUST VALUES ARE BEING RESET TO NOTHING
                 cav.trust_scores = cav.assess_trust(other_cav.name)  # ADD BREAK POINT HERE
+                # cav trust scores after this get reset to empty.
+
                 cav.share_info(other_cav)
 
         print("")
