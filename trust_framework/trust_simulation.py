@@ -301,7 +301,6 @@ class ConnectedAutonomousVehicle:
         self.trust_scores = trust_scores if trust_scores else {}
         self.detected_objects = detected_objects if detected_objects else []
         self.shared_info = {}
-        
 
     def assess_trust(self, cav_name):
         """
@@ -320,7 +319,7 @@ class ConnectedAutonomousVehicle:
         # Simulate trust assessment based on the DC trust model
         # In this simplified example, we update trust based on received evidence and aij constant
         # Replace this logic with specific trust assessment rules
-        if cav_name == self.name or cav_name in self.trust_scores:
+        if cav_name == self.name:  # or cav_name in self.trust_scores
             return {}
 
         # Generate random evidence counts (positive, negative, uncertain)
@@ -499,7 +498,9 @@ def main():
             if cav.name != other_cav.name:
                 # Update Trust Scores with Assess Trust Function
                 # ERROR HERE. THE ORIGINAL CAV TRUST VALUES ARE BEING RESET TO NOTHING
-                cav.trust_scores = cav.assess_trust(other_cav.name)  # ADD BREAK POINT HERE
+                new_trust_score = cav.assess_trust(other_cav.name)
+                if new_trust_score is not None:  # Assuming assess_trust returns None if no update is needed
+                    cav.trust_scores[other_cav.name] = new_trust_score
                 # cav trust scores after this get reset to empty.
 
                 cav.share_info(other_cav)
