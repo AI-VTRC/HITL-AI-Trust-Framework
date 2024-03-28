@@ -283,27 +283,26 @@ def tuple_to_dict(trust_tuples, cav_names, obj_index):
 
 def create_cav_objects(num_cavs):
     """
-    Modifies the function to create a dictionary where each CAV has a tuple of three trust scores,
-    evenly distributed as much as possible with adjustments for rounding to ensure the total
-    sum of each tuple is as close to 1 as possible and evenly distributed across CAVs.
+    Creates a dictionary where each CAV has a tuple of trust scores for the other CAVs,
+    ensuring each tuple sums to 1. Each CAV's trust scores are evenly distributed as much
+    as possible, with adjustments for rounding to ensure the total sum for each tuple is 1.
     """
-    # Calculate base trust scores for three parts
-    base_trust = round(1.0 / 3, 2)  # Base trust score for each part
+    # Initialize the dictionaries
+    trust_scores_init = {}
+    detected_objects_init = {f'cav{i+1}': [] for i in range(num_cavs)}
 
-    # Calculate corrections for rounding issues to ensure the sum of three parts is as close to 1 as possible
-    correction = round(1.0 - (base_trust * 3), 2)
-
-    # Apply corrections to distribute the rounding error across the three parts
-    if correction == 0.01:
-        trust_scores_tuple = (base_trust, base_trust, base_trust + correction)
-    elif correction == 0.02:
-        trust_scores_tuple = (base_trust, base_trust + 0.01, base_trust + 0.01)
-    else:
-        trust_scores_tuple = (base_trust, base_trust, base_trust)  # No correction needed
-
-    # Create dictionaries for trust scores and detected objects
-    trust_scores_init = {f'cav{i + 1}': trust_scores_tuple for i in range(num_cavs)}
-    detected_objects_init = {f'cav{i + 1}': [] for i in range(num_cavs)}
+    # Iterate through each CAV to assign trust scores for the other CAVs
+    for i in range(num_cavs):
+        # Generate evenly distributed trust scores for n-1 CAVs
+        scores = [1 / (num_cavs - 1) for _ in range(num_cavs - 1)]
+        # Adjust the last element to ensure the sum is 1
+        scores[-1] = 1 - sum(scores[:-1])
+        # Round the scores to 2 decimal places and adjust for rounding errors if necessary
+        scores = [round(score, 2) for score in scores]
+        correction = 1.0 - sum(scores)
+        scores[-1] += correction
+        # Assign the scores to the current CAV
+        trust_scores_init[f'cav{i+1}'] = tuple(scores)
 
     return trust_scores_init, detected_objects_init
 
@@ -484,6 +483,9 @@ def main():
 
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(n_Agents)
+    trust_scores_init = {f'cav{i}': (0.5, 0.5) for i in range(1, 4)}
+    #trust_scores_init = {f'cav{i}': (0.33, 0.33, 0.34) for i in range(1, 5)}
+    #detected_objects_init = {f'cav{i}': [] for i in range(1, 5)}
 
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
     os.chdir(r'Example/')
@@ -538,7 +540,6 @@ def main():
         print(f"Trust Scores for {cav.name} are {cav.trust_scores}")
         print(f"FOV Detected Objects for {cav.name} are {cav.detected_objects}")
         print(f"FOV Scene Description for {cav.name} are {cav.shared_info}")
-        print("")
 
     # Print Final Trust Recommendations
     print("Final Trust Recommendations:")
