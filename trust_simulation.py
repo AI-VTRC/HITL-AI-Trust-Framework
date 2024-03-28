@@ -286,17 +286,27 @@ def tuple_to_dict(trust_tuples, cav_names, obj_index):
 
 def create_cav_objects(num_cavs):
     """
-    Creates two dictionaries: trust_scores_init and detected_objects_init
-    for a given number of CAVs. The trust scores are evenly distributed
-    among the entries in the trust_scores_init dictionary, with adjustments
-    made for rounding to ensure the total sum is 1.
+    Modifies the function to create a dictionary where each CAV has a tuple of three trust scores,
+    evenly distributed as much as possible with adjustments for rounding to ensure the total
+    sum of each tuple is as close to 1 as possible and evenly distributed across CAVs.
     """
-    trust_scores_list = [round(1.0 / num_cavs, 2) for _ in range(num_cavs)]
-    correction = round(1.0 - sum(trust_scores_list), 2)  # Calculate correction needed due to rounding
-    trust_scores_list[-1] += correction  # Apply correction to the last element
+    # Calculate base trust scores for three parts
+    base_trust = round(1.0 / 3, 2)  # Base trust score for each part
 
-    trust_scores_init = {f'cav{i+1}': trust_scores_list[i] for i in range(num_cavs)}
-    detected_objects_init = {f'cav{i+1}': [] for i in range(num_cavs)}
+    # Calculate corrections for rounding issues to ensure the sum of three parts is as close to 1 as possible
+    correction = round(1.0 - (base_trust * 3), 2)
+
+    # Apply corrections to distribute the rounding error across the three parts
+    if correction == 0.01:
+        trust_scores_tuple = (base_trust, base_trust, base_trust + correction)
+    elif correction == 0.02:
+        trust_scores_tuple = (base_trust, base_trust + 0.01, base_trust + 0.01)
+    else:
+        trust_scores_tuple = (base_trust, base_trust, base_trust)  # No correction needed
+
+    # Create dictionaries for trust scores and detected objects
+    trust_scores_init = {f'cav{i + 1}': trust_scores_tuple for i in range(num_cavs)}
+    detected_objects_init = {f'cav{i + 1}': [] for i in range(num_cavs)}
 
     return trust_scores_init, detected_objects_init
 
@@ -488,7 +498,7 @@ def main():
     first_image_paths = [os.path.join(root_connection, f'Car{i}', 'frame_1.jpg') for i in range(1, n_Agents + 1)]
 
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
-    #os.chdir(r'school_data/street/')
+    #os.chdir(r'Example/')
     #image_paths = [
     #    'street_1.jpeg',
     #    'street_2.jpeg',
