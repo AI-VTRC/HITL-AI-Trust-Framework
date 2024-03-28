@@ -483,9 +483,6 @@ def main():
 
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(n_Agents)
-    trust_scores_init = {f'cav{i}': (0.5, 0.5) for i in range(1, 4)}
-    #trust_scores_init = {f'cav{i}': (0.33, 0.33, 0.34) for i in range(1, 5)}
-    #detected_objects_init = {f'cav{i}': [] for i in range(1, 5)}
 
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
     os.chdir(r'Example/')

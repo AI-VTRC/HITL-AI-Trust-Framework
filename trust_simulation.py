@@ -292,7 +292,7 @@ def create_cav_objects(num_cavs):
     """
     # Initialize the dictionaries
     trust_scores_init = {}
-    detected_objects_init = {f'cav{i+1}': [] for i in range(num_cavs)}
+    detected_objects_init = {f'cav{i + 1}': [] for i in range(num_cavs)}
 
     # Iterate through each CAV to assign trust scores for the other CAVs
     for i in range(num_cavs):
@@ -305,10 +305,9 @@ def create_cav_objects(num_cavs):
         correction = 1.0 - sum(scores)
         scores[-1] += correction
         # Assign the scores to the current CAV
-        trust_scores_init[f'cav{i+1}'] = tuple(scores)
+        trust_scores_init[f'cav{i + 1}'] = tuple(scores)
 
     return trust_scores_init, detected_objects_init
-
 
 
 # Class definition for CAV
@@ -498,13 +497,13 @@ def main():
     first_image_paths = [os.path.join(root_connection, f'Car{i}', 'frame_1.jpg') for i in range(1, n_Agents + 1)]
 
     # Set directory for initial Field of View capture for each of the 4 simulated CAVs
-    #os.chdir(r'Example/')
-    #image_paths = [
+    # os.chdir(r'Example/')
+    # image_paths = [
     #    'street_1.jpeg',
     #    'street_2.jpeg',
     #    'street_3.jpeg',
     #    'street_4.jpeg'
-    #]
+    # ]
 
     # Initialize CAVs with the first image
     cavs = [
@@ -523,7 +522,7 @@ def main():
     for idx, cav in enumerate(cavs):
         print(f"Processing {cav.name}")
 
-        #image_path = image_paths[idx]
+        # image_path = image_paths[idx]
         image_path = first_image_paths[idx]
 
         cav.trust_scores = tuple_to_dict(trust_scores_init, cav_names, idx)
@@ -555,7 +554,8 @@ def main():
 
     # NEW processing to check and refine
     # Loop through the remaining images for each CAV
-    for image_index in range(2, 19):  # Assuming there are 18 images, starting from 2 since 1 was used for initialization
+    for image_index in range(2,
+                             19):  # Assuming there are 18 images, starting from 2 since 1 was used for initialization
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
             image_path = os.path.join(root_connection, f'Car{i + 1}', f'image{image_index}.jpg')
