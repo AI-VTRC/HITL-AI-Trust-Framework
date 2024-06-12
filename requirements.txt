@@ -1,1 +1,9 @@
 black
+opencv-python
+numpy
+torch
+requests
+pillow
+torchvision
+ultralytics
+tensorflow
