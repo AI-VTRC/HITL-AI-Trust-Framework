@@ -25,6 +25,7 @@ import requests
 from PIL import Image
 import torchvision.transforms as transforms
 from ultralytics import YOLO
+from datetime import datetime
 from tensorflow.keras.applications.resnet_v2 import (
     ResNet101V2,
     preprocess_input,
@@ -173,81 +174,6 @@ def classify_image_original(image_path):
     # Return the top scene classification result and confidence
     # Outputs: ('fountain', 0.23353487)
     return decoded_predictions[0][1], decoded_predictions[0][2]
-
-
-# # Function to process and classify an image using ResNet for scene classification
-# def classify_image(image_path, model_classification):
-#     """
-#         Process and classify an image to predict the scene it represents using a given classification model.
-
-#         Parameters:
-#         - image_path (str): Path to the image file to be classified.
-#         - model_classification (torch.nn.Module): Pre-trained ResNet model for scene classification.
-
-#         Returns:
-#         - tuple (str, float): A tuple containing the top predicted class label and its corresponding confidence score.
-
-#         Raises:
-#         - ValueError: If the image can't be loaded or if its dimensions are invalid.
-#         - ConnectionError: If there's an issue fetching the class labels from the remote URL.
-
-#         Note:
-#         The function attempts to load class labels from a local file named 'imagenet-simple-labels.json'. If the file
-#         is not found, it fetches the labels from a URL.
-#     """
-
-#     # Load and preprocess the image
-#     img = cv2.imread(image_path)
-#     if img is None or img.size == 0:
-#         raise ValueError(f"Failed to load image or invalid image dimensions at path: {image_path}")
-
-#     preprocess_classification = transforms.Compose([
-#         transforms.Resize(256),
-#         transforms.CenterCrop(224),
-#         transforms.ToTensor(),
-#         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-#     ])
-
-#     original_image = img.copy()  # Make a copy for visualization
-#     original_image_rgb = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)  # Convert image to RGB
-#     image = Image.fromarray(original_image_rgb)  # Convert NumPy array to PIL image
-#     image = preprocess_classification(image)
-#     image = image.unsqueeze(0)  # Add a batch dimension
-
-#     # Perform inference for image classification
-#     with torch.no_grad():
-#         outputs_classification = model_classification(image)
-
-#     # Try to Load class labels locally first, if not available fetch from URL
-#     try:
-#         with os.open('imagenet-simple-labels.json', 'r') as f:
-#             labels = json.load(f)
-#     except FileNotFoundError:
-#         LABELS_URL = 'https://raw.githubusercontent.com/anishathalye/imagenet-simple-labels/master/imagenet-simple-labels.json'
-#         response = requests.get(LABELS_URL)
-#         if response.status_code != 200:
-#             raise ConnectionError(f"Failed to fetch labels from {LABELS_URL}")
-#         labels = response.json()
-
-#     # Get the predicted class index and label
-#     _, predicted_idx_classification = torch.max(outputs_classification, 1)
-
-#     # Output the top 20 labels and their confidences
-#     top_k = 20
-#     top_confidences, top_indices = torch.topk(outputs_classification, top_k, 1)
-
-#     labels_result = [labels[idx] for idx in top_indices[0]]
-#     confidences = [conf.item() for conf in top_confidences[0]]
-
-#     scene_classification = {}
-#     for i in range(len(labels_result)):
-#         scene_classification[labels_result[i]] = confidences[i]
-
-#     # Return the top scene classification results (top_confidences and top_indices)
-#     first_key = list(scene_classification.keys())[0]
-#     first_value = scene_classification[first_key]
-
-#     return first_key, first_value
 
 
 def classify_image(image_path, model_classification):
@@ -596,7 +522,6 @@ class ConnectedAutonomousVehicle:
 
 
 def main():
-    # root_connection = r'F:\Matt\PhD_Research\AI_Trust_Framework\nuScenes_by_Motional\samples\Sub_Sample_1'
     root_connection = "../data"
     n_Agents = 4  # Number of CAVs that will connect together
 
@@ -614,15 +539,6 @@ def main():
         os.path.join(root_connection, f"Car{i}", "frame_1.jpg")
         for i in range(1, n_Agents + 1)
     ]
-
-    # Set directory for initial Field of View capture for each of the 4 simulated CAVs
-    # os.chdir(r'Example/')
-    # image_paths = [
-    #    'street_1.jpeg',
-    #    'street_2.jpeg',
-    #    'street_3.jpeg',
-    #    'street_4.jpeg'
-    # ]
 
     # Initialize CAVs with the first image
     cavs = [
@@ -697,9 +613,34 @@ def main():
             labels, confidences = classify_image(image_path, model_classification)
             cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
-    # Print Final Trust Recommendations
+    def format_to_bullets(d, indent=0):
+        """Reformat data into bullet points"""
+        result = ""
+        for key, value in d.items():
+            result += "    " * indent + f"- {key}:\n"
+            if isinstance(value, dict):
+                result += format_to_bullets(value, indent + 1)
+            else:
+                result += "    " * (indent + 1) + f"- {value}\n"
+        return result
+
+    # Convert trust_recommendations to JSON formatted string for printing
     print("Final Trust Recommendations:")
-    print(json.dumps(trust_recommendations, indent=4))
+    result = json.dumps(trust_recommendations, indent=4)
+    print(result)
+
+    # Get the current datetime and format it
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    # Create the filename with the formatted datetime
+    filename = f"results/{current_datetime}.txt"
+
+    # Reformat trust_recommendations to bullet points
+    formatted_data = format_to_bullets(trust_recommendations)
+
+    # Save the formatted string to the file
+    with open(filename, "w") as file:
+        file.write(formatted_data)
 
 
 if __name__ == "__main__":
