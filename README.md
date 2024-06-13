@@ -1,1 +1,1 @@
-# HITL-AI-Trust-Framework
+# HITL AI Trust Framework
