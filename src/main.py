@@ -597,17 +597,17 @@ class ConnectedAutonomousVehicle:
 
 def main():
     # root_connection = r'F:\Matt\PhD_Research\AI_Trust_Framework\nuScenes_by_Motional\samples\Sub_Sample_1'
-    root_connection = "Data"
+    root_connection = "../data"
     n_Agents = 4  # Number of CAVs that will connect together
 
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(n_Agents)
 
     # Syncronize connection of perspectives per agent
-    cav1_stream = "Data/Car1"
-    cav2_stream = "Data/Car2"
-    cav3_stream = "Data/Car3"
-    cav4_stream = "Data/Car4"
+    cav1_stream = "../data/Car1"
+    cav2_stream = "../data/Car2"
+    cav3_stream = "../data/Car3"
+    cav4_stream = "../data/Car4"
 
     # Initialize the first set of images for each CAV
     first_image_paths = [
