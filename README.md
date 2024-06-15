@@ -15,7 +15,7 @@ Steps:
 - `Trust Score Understanding (current developemnt)`: trust scores are updated iteratively based on the outcomes of each new interaction—each new image processed introduces a new opportunity for trust assessment based on the data shared and detected between the CAVs.
 
 ## Reproduction
-On terminal
+On terminal, to get the result of the run experience
 ```python
 conda create -n hitl python=3.8
 conda activate hitl
@@ -24,6 +24,17 @@ cd src
 python main.py
 ```
 
+On terminal, to get the .csv reports and visualization for the results, alter the details in `src/report.py`
+```sh
+cd src
+python report.py
+```
+
+
 ## Results 
-Results is located in `src/results` section.
+Results are located in `src/results` section.
+
+Reports are located in `src/reports` section.
+
+Plots will be provided when run the `src/report.py`
 
