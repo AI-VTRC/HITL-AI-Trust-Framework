@@ -1,113 +1,6 @@
 import random
-
-
-# Function to calculate overlap between two bounding boxes
-def calculate_overlap(bboxes1, bboxes2):
-    """
-    Calculate the overlap between lists of bounding boxes. The overlap for each bounding box
-    in bboxes1 with every bounding box in bboxes2 is computed and returned as a list.
-
-    Parameters:
-    - bboxes1 (list of tuples): A list of bounding boxes, where each bounding box is represented
-                                as a tuple in the format (x1, y1, x2, y2).
-    - bboxes2 (list of tuples): A list of bounding boxes, where each bounding box is represented
-                                as a tuple in the format (x1, y1, x2, y2).
-
-    Returns:
-    - list of floats: A list containing the overlap ratios. Each overlap ratio is the ratio of the
-                      intersection area to the smaller area of the two bounding boxes. If there's no
-                      overlap, the ratio is 0.0.
-    """
-
-    overlaps = []
-    for bbox1 in bboxes1:
-        if not bboxes2:
-            overlap = 0.0
-            overlaps.append(overlap)
-            break
-
-        for bbox2 in bboxes2:
-            x1, y1, x2, y2 = bbox1[0]  # Unpack the coordinates of bbox1
-            x3, y3, x4, y4 = bbox2[0]  # Unpack the coordinates of bbox2
-
-            left = max(x1, x3)
-            right = min(x2, x4)
-            top = max(y1, y3)
-            bottom = min(y2, y4)
-
-            if left < right and top < bottom:
-                intersection_area = (right - left) * (bottom - top)
-                area1 = (x2 - x1) * (y2 - y1)
-                area2 = (x4 - x3) * (y4 - y3)
-                overlap = intersection_area / min(area1, area2)
-            else:
-                overlap = 0.0
-
-            overlaps.append(overlap)
-
-    return overlaps
-
-
-def compute_iou(boxA, boxB):
-    """
-    Compute the Intersection over Union (IoU) between two bounding boxes.
-
-    The IoU metric measures the overlap between two bounding boxes. It's the area of the intersection of the boxes
-    divided by the area of the union of the boxes. The resulting value is between 0 (no overlap) and 1 (perfect overlap).
-
-    Parameters:
-    - boxA (list): A list containing the coordinates of the first bounding box in the format [x1, y1, x2, y2],
-                   where (x1, y1) is the top-left corner and (x2, y2) is the bottom-right corner.
-    - boxB (list): A list containing the coordinates of the second bounding box in the same format as boxA.
-
-    Returns:
-    - float: The IoU value between the two bounding boxes.
-
-    Note:
-    The boxes are passed as lists containing a single list of coordinates. Only the first element ([0]) is considered.
-    """
-
-    # Determine the coordinates of the intersection rectangle
-    boxA = boxA[0]
-    boxB = boxB[0]
-
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
-
-    # Compute the area of the intersection rectangle
-    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
-
-    # Compute the area of both bounding boxes
-    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
-    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
-
-    # Compute the intersection over union
-    iou = interArea / float(boxAArea + boxBArea - interArea)
-
-    # Return the IoU
-    return iou
-
-
-def are_objects_consistent(objA, objB, iou_threshold=0.5):
-    """
-    Compare the consistency of two objects using their class and bounding box.
-
-    Parameters:
-    - objA: a dictionary representing an object with keys 'label' and 'box'
-    - objB: a dictionary representing an object with keys 'label' and 'box'
-    - iou_threshold: the threshold for the IoU to consider objects consistent
-
-    Returns:
-    - True if objects are consistent, otherwise False.
-    """
-    if objA["label"] != objB["label"]:
-        return False
-
-    iou = compute_iou(objA["box"], objB["box"])
-
-    return iou >= iou_threshold
+from utils import calculate_overlap
+from utils import are_objects_consistent
 
 
 class ConnectedAutonomousVehicle:
@@ -115,7 +8,7 @@ class ConnectedAutonomousVehicle:
     Represents a Connected Autonomous Vehicle (CAV) and its operations related to object detection, trust assessment,
     and information sharing with other CAVs.
 
-    Attributes:
+    @Attributes:
     - name (str): Unique identifier for the CAV.
     - fov (str): Field of View for the CAV.
     - trust_scores (dict): Dictionary containing trust scores for other CAVs.
@@ -143,16 +36,13 @@ class ConnectedAutonomousVehicle:
     def assess_trust(self, cav_name):
         """
         Assess the trust score for a specific CAV based on the DC trust model.
+        In this implementation, a simplified trust assessment model is used which might not reflect real-world complexities.
 
-        Parameters:
-            - cav_name (str): The name of the CAV whose trust is being assessed.
+        @Parameters:
+        - cav_name (str): The name of the CAV whose trust is being assessed.
 
-        Returns:
-            - float: Updated trust score for the given CAV.
-
-        Note:
-        In this implementation, a simplified trust assessment model is used which might not reflect
-        real-world complexities.
+        @Returns:
+        - float: Updated trust score for the given CAV.
         """
         # Simulate trust assessment based on the DC trust model
         # In this simplified example, we update trust based on received evidence and aij constant
@@ -200,13 +90,10 @@ class ConnectedAutonomousVehicle:
     def share_info(self, other_cav):
         """
         Simulate sharing of detected objects and scene information with another CAV.
+        In this implementation, a simplified trust assessment model is used which might not reflect real-world complexities.
 
-        Parameters:
-            - other_cav (ConnectedAutonomousVehicle): The other CAV to share information with.
-
-        Note:
-        This function will also simulate the trust assessment and updating of the trust scores based on the
-        shared information.
+        @Parameters:
+        - other_cav (ConnectedAutonomousVehicle): The other CAV to share information with.
         """
 
         # Simulate information reception by other CAV and trust assessment
