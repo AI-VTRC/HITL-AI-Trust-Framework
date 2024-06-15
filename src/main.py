@@ -1,3 +1,4 @@
+import time
 import os
 import json
 import torch
@@ -129,10 +130,11 @@ def run_experience(folder):
 
 
 def main():
-    for i in range(6):
+    for i in range(4, 6):
         run_experience(folder="Sample" + str(i))
-        break
-
+        # break
+        time.sleep(60)
+        
 
 if __name__ == "__main__":
     main()
