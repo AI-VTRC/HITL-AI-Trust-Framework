@@ -36,5 +36,5 @@ Results are located in `src/results` section.
 
 Reports are located in `src/reports` section.
 
-Plots will be provided when run the `src/report.py`
+Plots will be provided when run the `src/report.py`.
 
