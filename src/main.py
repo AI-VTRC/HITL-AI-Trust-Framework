@@ -10,17 +10,7 @@ from utils import detect_objects
 from utils import create_cav_objects
 from utils import tuple_to_dict
 from utils import format_to_bullets
-
-
-def get_image_count(folder_path):
-    """Returns the number of images in the specified folder."""
-    return len(
-        [
-            name
-            for name in os.listdir(folder_path)
-            if os.path.isfile(os.path.join(folder_path, name))
-        ]
-    )
+from utils import get_image_count
 
 
 def run_experience(folder):
