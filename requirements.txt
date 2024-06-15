@@ -7,3 +7,5 @@ pillow
 torchvision
 ultralytics
 tensorflow
+openpyxl
+plotly
