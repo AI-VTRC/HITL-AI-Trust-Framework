@@ -278,3 +278,14 @@ def format_to_bullets(d, indent=0):
         else:
             result += "    " * (indent + 1) + f"- {value}\n"
     return result
+
+
+def get_image_count(folder_path):
+    """Returns the number of images in the specified folder."""
+    return len(
+        [
+            name
+            for name in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, name))
+        ]
+    )
