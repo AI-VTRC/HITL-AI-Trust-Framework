@@ -12,6 +12,17 @@ from utils import tuple_to_dict
 from utils import format_to_bullets
 
 
+def get_image_count(folder_path):
+    """Returns the number of images in the specified folder."""
+    return len(
+        [
+            name
+            for name in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, name))
+        ]
+    )
+
+
 def run_experience(folder):
     """Main Driver"""
     # Load the pre-trained multi-label classification model and freeze parameters
@@ -31,6 +42,10 @@ def run_experience(folder):
 
     root_connection = "../data/" + folder
     num_cars = 4
+
+    # Determine the number of images by checking the first car's directory
+    example_car_folder = os.path.join(root_connection, "Car1")
+    num_images = get_image_count(example_car_folder)
 
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(num_cars)
@@ -72,32 +87,17 @@ def run_experience(folder):
         labels, confidences = classify_image(image_path, model_classification)
         cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
-    # Update each CAVs trust scores for each other based on the current shared information.
-    for idx, cav in enumerate(cavs):
-        for other_cav in cavs:
-            if cav.name != other_cav.name:
-                # Update Trust Scores with Assess Trust Function
-                # ERROR HERE. THE ORIGINAL CAV TRUST VALUES ARE BEING RESET TO NOTHING
-                new_trust_score = cav.assess_trust(other_cav.name)
-                if (
-                    new_trust_score is not None
-                ):  # Assuming assess_trust returns None if no update is needed
-                    cav.trust_scores[other_cav.name] = new_trust_score
-                # cav trust scores after this get reset to empty.
+    # Initialize a logging dictionary
+    log_data = {}
 
-                cav.share_info(other_cav)
+    # Initialize trust score tracking
+    for cav in cavs:
+        log_data[cav.name] = {
+            other_cav.name: [] for other_cav in cavs if other_cav.name != cav.name
+        }
 
-        print("")
-        print(f"Trust Scores for {cav.name} are {cav.trust_scores}")
-        print(f"FOV Detected Objects for {cav.name} are {cav.detected_objects}")
-        print(f"FOV Scene Description for {cav.name} are {cav.shared_info}")
-        print("________________________________")
-
-    # NEW processing to check and refine
     # Loop through the remaining images for each CAV
-    for image_index in range(
-        2, 19
-    ):  # Assuming there are 18 images, starting from 2 since 1 was used for initialization
+    for image_index in range(1, num_images + 1):  # Use num_images for accurate count
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
             image_path = os.path.join(
@@ -107,29 +107,41 @@ def run_experience(folder):
 
             # Update CAV's fov to the current image
             cav.fov = image_path
-
-            # Example processing steps, modify according to your actual functions
-            cav.trust_scores = tuple_to_dict(
-                trust_scores_init, [cav.name for cav in cavs], i
-            )
             cav.detected_objects = detect_objects(image_path, model_object_detection)
             labels, confidences = classify_image(image_path, model_classification)
             cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
+            # Update and log trust scores
+            for other_cav in cavs:
+                if cav.name != other_cav.name:
+                    cav.share_info(other_cav)
+                    new_trust_score = cav.assess_trust(other_cav.name)
+                    if new_trust_score is not None:
+                        cav.trust_scores[other_cav.name] = new_trust_score
+                        log_data[cav.name][other_cav.name].append(new_trust_score)
+
+        print(f"Trust Scores after processing image {image_index}:")
+        print(json.dumps({cav.name: cav.trust_scores for cav in cavs}, indent=4))
+
+    # Save the log data to a file or further processing
     print("________________________________")
     print("Final Trust Recommendations:")
-    result = json.dumps(trust_recommendations, indent=4)
-    print(result)
     current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = "results/" + folder + f"/{current_datetime}.txt"
-    formatted_data = format_to_bullets(trust_recommendations)
+    filename = "results/" + f"{folder}" + f"/{folder}_{current_datetime}.json"
     with open(filename, "w") as file:
+        json.dump(log_data, file, indent=4)
+
+    print(json.dumps(trust_recommendations, indent=4))
+    formatted_data = format_to_bullets(trust_recommendations)
+    result_filename = "results/" + f"{folder}" + f"/{folder}_{current_datetime}.txt"
+    with open(result_filename, "w") as file:
         file.write(formatted_data)
 
 
 def main():
     for i in range(6):
         run_experience(folder="Sample" + str(i))
+        break
 
 
 if __name__ == "__main__":
