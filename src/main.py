@@ -12,7 +12,7 @@ from utils import tuple_to_dict
 from utils import format_to_bullets
 
 
-def main():
+def run_experience(folder):
     """Main Driver"""
     # Load the pre-trained multi-label classification model and freeze parameters
     model_classification = torch.hub.load(
@@ -29,7 +29,7 @@ def main():
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "../data/Sample0"
+    root_connection = "../data/" + folder
     num_cars = 4
 
     # Initialize trust values for connected agents
@@ -40,7 +40,7 @@ def main():
         os.path.join(root_connection, f"Car{i}", "frame_1.jpg")
         for i in range(1, num_cars + 1)
     ]
-    
+
     # Initialize CAVs with the first image
     cavs = [
         ConnectedAutonomousVehicle(
@@ -53,7 +53,7 @@ def main():
         )
         for i in range(1, num_cars + 1)
     ]
-    
+
     trust_scores_init = list(trust_scores_init.values())
     cav_names = [cav.name for cav in cavs]
 
@@ -121,10 +121,15 @@ def main():
     result = json.dumps(trust_recommendations, indent=4)
     print(result)
     current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"results/Sample0/{current_datetime}.txt"
+    filename = "results/" + folder + f"/{current_datetime}.txt"
     formatted_data = format_to_bullets(trust_recommendations)
     with open(filename, "w") as file:
         file.write(formatted_data)
+
+
+def main():
+    for i in range(6):
+        run_experience(folder="Sample" + str(i))
 
 
 if __name__ == "__main__":
