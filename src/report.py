@@ -105,8 +105,8 @@ def provide_visualize(folder: str, report_json: str):
 
 def main():  #
     # Replace the folder and report to get the report and visualization accordingly
-    provide_report(folder="Sample0", report_json="Sample0_2024-06-15_14-56-40")
-    provide_visualize(folder="Sample0", report_json="Sample0_2024-06-15_14-56-40")
+    #provide_report(folder="Sample0", report_json="Sample0_2024-06-15_14-56-40")
+    provide_visualize(folder="Sample6", report_json="Sample6_2024-06-16_18-00-12")
 
 
 if __name__ == "__main__":

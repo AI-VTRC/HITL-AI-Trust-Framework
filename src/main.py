@@ -34,6 +34,7 @@ def run_experience(folder):
     root_connection = "../data/" + folder
     num_cars = 4
 
+    # Assumes the number of images for each Car is the same
     # Determine the number of images by checking the first car's directory
     example_car_folder = os.path.join(root_connection, "Car1")
     num_images = get_image_count(example_car_folder)
