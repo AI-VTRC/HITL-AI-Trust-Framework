@@ -30,6 +30,87 @@ cd src
 python report.py
 ```
 
+## Implementation validation
+In the `Towards Trustworthy Perception Information Sharing on Connected and Autonomous Vehicles`, the author use Dirichlet-Categorical (DC) model for trust assessment. Our `cavs.py` correctly implement the DDC model for trust assessment
+```python
+# Simulate trust assessment based on the DC trust model
+positive_evidence = random.randint(0, 10)
+negative_evidence = random.randint(0, 10)
+uncertain_evidence = random.randint(0, 10)
+
+# Constants (aij) representing prior opinions
+aij = random.uniform(0, 1)
+
+# Trust assessment logic
+alpha_ij = positive_evidence + aij * 10
+beta_ij = negative_evidence + (1 - aij) * 10
+gamma_ij = uncertain_evidence
+
+# Computing the trust value omega_ij as the expected value
+total_count = alpha_ij + beta_ij + gamma_ij
+omega_ij = alpha_ij / total_count  # Expected trust value (Trustworthiness)
+```
+
+Also, our trust fusion to update the trust scores of other vehicles are correct compare tot the paper
+```python
+for other_cav_name, trust_score in self.trust_scores.items():
+    if other_cav_name != cav_name:
+        trust_score_a = omega_ij
+        trust_score_b = trust_score
+        if trust_score_a < self.trust_threshold and self.trust_threshold <= trust_score_b < 1.0:
+            omega_ij = 0.6  # Set to a higher value to trust the other CAV
+
+```
+
+In addtion, the intiialization, object detection and object classification is correct compare to the paper.
+
+Futhermore, the CAVs share info and logging is correct compare to the paper.
+```python
+# Update and log trust scores
+for other_cav in cavs:
+    if cav.name != other_cav.name:
+        cav.share_info(other_cav)
+        new_trust_score = cav.assess_trust(other_cav.name)
+        if new_trust_score is not None:
+            cav.trust_scores[other_cav.name] = new_trust_score
+            log_data[cav.name][other_cav.name].append(new_trust_score)
+
+```
+
+## Things to be improved
+- Evidence generation: I am not sure if this will reflect the real-world
+
+```python
+# Simulate trust assessment based on the DC trust model
+positive_evidence = random.randint(0, 10)
+negative_evidence = random.randint(0, 10)
+uncertain_evidence = random.randint(0, 10)
+
+# Constants (aij) representing prior opinions
+aij = random.uniform(0, 1)
+```
+
+- Trust fusion: right now the trust fusion scheme does not consider historical evidence or interactions over time.
+```python
+for other_cav_name, trust_score in self.trust_scores.items():
+    if other_cav_name != cav_name:
+        trust_score_a = omega_ij
+        trust_score_b = trust_score
+        if trust_score_a < self.trust_threshold and self.trust_threshold <= trust_score_b < 1.0:
+            omega_ij = 0.6  # Set to a higher value to trust the other CAV
+```
+
+- Temporal in info sharing: right now, there is no temporal factor included when updating the trust score.
+```python
+# Trust assessment logic
+alpha_ij = positive_evidence + aij * 10
+beta_ij = negative_evidence + (1 - aij) * 10
+gamma_ij = uncertain_evidence
+
+# Computing the trust value omega_ij as the expected value
+total_count = alpha_ij + beta_ij + gamma_ij
+omega_ij = alpha_ij / total_count  # Expected trust value (Trustworthiness)
+```
 
 ## Results 
 Results are located in `src/results` section.
