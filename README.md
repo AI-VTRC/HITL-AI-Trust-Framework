@@ -30,6 +30,12 @@ cd src
 python report.py
 ```
 
+On terminal, to perform an interactive Dash visualization for the results, alter the details in `src/report_interactive.py`
+```sh
+cd src
+python report_interactive.py
+```
+
 ## Implementation validation
 In the `Towards Trustworthy Perception Information Sharing on Connected and Autonomous Vehicles`, the author use Dirichlet-Categorical (DC) model for trust assessment. Our `cavs.py` correctly implement the DDC model for trust assessment
 ```python
