@@ -14,7 +14,7 @@ from utils import format_to_bullets
 from utils import get_image_count
 
 
-def run_experience(folder):
+def run_experience(folder, trust_threshold):
     """Main Driver"""
     # Load the pre-trained multi-label classification model and freeze parameters
     model_classification = torch.hub.load(
@@ -25,13 +25,10 @@ def run_experience(folder):
     # Load the pre-trained object detection model
     model_object_detection = YOLO("yolov8n.pt")
 
-    # Define the trust threshold
-    trust_threshold = 0.5
-
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "../data/" + folder
+    root_connection = "assets/data/" + folder
     num_cars = 4
 
     # Assumes the number of images for each Car is the same
@@ -119,7 +116,11 @@ def run_experience(folder):
     print("________________________________")
     print("Final Trust Recommendations:")
     current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = "results/" + f"{folder}" + f"/{folder}_{current_datetime}.json"
+    filename = (
+        "results/"
+        + f"{folder}"
+        + f"/{folder}_{current_datetime}_threshold_{trust_threshold}.json"
+    )
     with open(filename, "w") as file:
         json.dump(log_data, file, indent=4)
 
@@ -131,10 +132,14 @@ def run_experience(folder):
 
 
 def main():
-    for i in range(4, 6):
-        run_experience(folder="Sample" + str(i))
-        # break
-        time.sleep(60)
+    # trust_thresholds = [0.3, 0.5, 0.7, 0.9]
+    trust_thresholds = [0.3]
+
+    for trust_threshold in trust_thresholds:
+        for i in range(3, 7):  # Example folders
+            run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
+            # break
+            time.sleep(20)
 
 
 if __name__ == "__main__":
