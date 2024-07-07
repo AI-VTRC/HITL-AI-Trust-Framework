@@ -9,3 +9,5 @@ ultralytics
 tensorflow
 openpyxl
 plotly
+dash
+dash-bootstrap-components
