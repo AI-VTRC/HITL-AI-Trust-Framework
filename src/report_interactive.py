@@ -2,15 +2,19 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objects as go
 import json
 import os
 
 # Load the trust data
-folder = "Sample6"
-report_json = "Sample6_2024-06-16_18-00-12"
+# folder = "Sample6"
+# report_json = "Sample6_2024-06-16_18-00-12"
+
+folder = "Sample5"
+report_json = "Sample5_2024-06-16_16-59-23"
+
 file_path = f"results/{folder}/{report_json}.json"
 with open(file_path, "r") as file:
     trust_data = json.load(file)
@@ -56,6 +60,7 @@ image_paths = get_image_paths(root_connection, num_cars, num_images)
 # Layout of the Dash app
 app.layout = dbc.Container(
     [
+        dcc.Store(id="legend-state", data={}),
         dbc.Row(
             dbc.Col(
                 html.H1("CAV Trust Evaluation Dashboard"),
@@ -84,7 +89,6 @@ app.layout = dbc.Container(
                     value=1,
                     marks={i: str(i) for i in range(1, num_images + 1)},
                 ),
-                width={"size": 8, "offset": 2},
             )
         ),
         dbc.Row(html.Div(style={"height": "40px"})),
