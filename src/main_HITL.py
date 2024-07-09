@@ -15,6 +15,15 @@ from utils import format_to_bullets
 from utils import get_image_count
 
 
+# Define user configurations
+user_configurations = [
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 3},
+    {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10},
+    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': False, 'trust_frames_required': 0},
+    {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0}
+]
+
+
 def run_experience(folder):
     """Main Driver"""
     # Load the pre-trained multi-label classification model and freeze parameters
@@ -31,9 +40,6 @@ def run_experience(folder):
 
     root_connection = "../data/" + folder
     num_cars = 4
-    user_trust_levels = ['Moderate', 'Cautious', 'Trusting', 'Moderate']  # Define trust levels for each user
-    users = [User(user_id=i, name=f"User{i}", trust_level=user_trust_levels[i-1], requires_trust_history=True,
-                  trust_frames_required=5) for i in range(1, num_cars + 1)]
 
     # Assumes the number of images for each Car is the same
     # Determine the number of images by checking the first car's directory
@@ -43,24 +49,30 @@ def run_experience(folder):
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(num_cars)
 
-    # Initialize the first set of images for each CAV
-    image_paths = [
-        os.path.join(root_connection, f"Car{i}", "frame_1.jpg")
-        for i in range(1, num_cars + 1)
-    ]
+    # Initialize Users from configurations
+    users = [User(user_id=config['id'], name=config['name'],
+                  trust_level=config['trust_level'],
+                  requires_trust_history=config['requires_trust_history'],
+                  trust_frames_required=config['trust_frames_required'])
+             for config in user_configurations]
 
-    # Initialize CAVs with the first image
-    cavs = [
-        ConnectedAutonomousVehicle(
-            name=f"cav{i}",
-            fov=image_paths[i - 1],
-            trust_scores=trust_scores_init[f"cav{i}"],
-            detected_objects=detected_objects_init[f"cav{i}"],
-            trust_threshold=users[i-1].trust_level,
-            trust_recommendations=trust_recommendations,
-        )
-        for i in range(1, num_cars + 1)
-    ]
+    # Initialize CAVs and link each with corresponding User
+    image_paths = [os.path.join(root_connection, f"Car{i}", "frame_1.jpg") for i in range(1, len(users) + 1)]
+    cavs = []
+
+    # Initialize CAVs with corresponding User settings
+    for i, user in enumerate(users):
+        user_settings = {
+            'trust_threshold': user.trust_level,  # Example user-specific setting
+            'requires_trust_history': user.requires_trust_history,
+            'trust_frames_required': user.trust_frames_required
+        }
+        cavs.append(ConnectedAutonomousVehicle(
+            name=f"cav{i+1}",
+            detected_objects=detected_objects_init[f"cav{i+1}"],
+            trust_scores=trust_scores_init[f"cav{i+1}"],
+            user_settings=user_settings
+        ))
 
     trust_scores_init = list(trust_scores_init.values())
     cav_names = [cav.name for cav in cavs]
@@ -132,7 +144,7 @@ def run_experience(folder):
 
 
 def main():
-    for i in range(4, 6):
+    for i in range(1, 2):  # Simulate only for Sample 1
         run_experience(folder="Sample" + str(i))
         # break
         time.sleep(60)
