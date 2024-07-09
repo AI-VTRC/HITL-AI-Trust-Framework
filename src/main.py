@@ -132,14 +132,14 @@ def run_experience(folder, trust_threshold):
 
 
 def main():
-    # trust_thresholds = [0.3, 0.5, 0.7, 0.9]
-    trust_thresholds = [0.3]
+    # trust_thresholds = [0.3, 0.5, 0.8]
+    trust_thresholds = [0.8]
 
     for trust_threshold in trust_thresholds:
-        for i in range(3, 7):  # Example folders
+        for i in range(7):
             run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
             # break
-            time.sleep(20)
+            time.sleep(10)
 
 
 if __name__ == "__main__":
