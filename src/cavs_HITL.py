@@ -1,5 +1,4 @@
 import random
-from user import User
 from utils import calculate_overlap, are_objects_consistent
 
 

@@ -5,8 +5,8 @@ import torch
 from ultralytics import YOLO
 from datetime import datetime
 
-from cavs_HITL import ConnectedAutonomousVehicle
 from user import User
+from cavs_HITL import ConnectedAutonomousVehicle
 from utils import classify_image
 from utils import detect_objects
 from utils import create_cav_objects
@@ -38,7 +38,7 @@ def run_experience(folder):
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "../data/" + folder
+    root_connection = "../assets/data/" + folder
     num_cars = 4
 
     # Assumes the number of images for each Car is the same
