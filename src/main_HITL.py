@@ -38,7 +38,7 @@ def run_experience(folder):
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "../assets/data/" + folder
+    root_connection = os.path.abspath("assets/data") + os.sep + folder
     num_cars = 4
 
     # Assumes the number of images for each Car is the same
@@ -119,10 +119,16 @@ def run_experience(folder):
             # Update and log trust scores
             for other_cav in cavs:
                 if cav.name != other_cav.name:
-                    cav.share_info(other_cav, users[cavs.index(cav)])
-                    new_trust_score = cav.assess_trust(other_cav.name)
+                    user = users[cavs.index(cav)]  # Ensure the correct user is associated with the cav
+                    cav.share_info(other_cav, user)
+                    # Pass the user's name to the assess_trust method
+                    new_trust_score = cav.assess_trust(other_cav.name, user.name)
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score
+                        if cav.name not in log_data:
+                            log_data[cav.name] = {}
+                        if other_cav.name not in log_data[cav.name]:
+                            log_data[cav.name][other_cav.name] = []
                         log_data[cav.name][other_cav.name].append(new_trust_score)
 
         print(f"Trust Scores after processing image {image_index}:")
