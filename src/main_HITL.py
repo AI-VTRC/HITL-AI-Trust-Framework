@@ -17,9 +17,9 @@ from utils import get_image_count
 
 # Define user configurations
 user_configurations = [
-    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 3},
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5},
     {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10},
-    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': False, 'trust_frames_required': 0},
+    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3},
     {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0}
 ]
 
@@ -62,16 +62,11 @@ def run_experience(folder):
 
     # Initialize CAVs with corresponding User settings
     for i, user in enumerate(users):
-        user_settings = {
-            'trust_threshold': user.trust_level,  # Example user-specific setting
-            'requires_trust_history': user.requires_trust_history,
-            'trust_frames_required': user.trust_frames_required
-        }
         cavs.append(ConnectedAutonomousVehicle(
-            name=f"cav{i+1}",
-            detected_objects=detected_objects_init[f"cav{i+1}"],
-            trust_scores=trust_scores_init[f"cav{i+1}"],
-            user_settings=user_settings
+            name=f"cav{i + 1}",
+            detected_objects=detected_objects_init[f"cav{i + 1}"],
+            trust_scores=trust_scores_init[f"cav{i + 1}"],
+            user=user  # Directly pass the user object if it contains all necessary settings and trackers
         ))
 
     trust_scores_init = list(trust_scores_init.values())

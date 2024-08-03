@@ -3,15 +3,16 @@ from utils import calculate_overlap, are_objects_consistent
 
 
 class ConnectedAutonomousVehicle:
-    def __init__(self, name, detected_objects=None, trust_scores=None, user_settings=None):
+    def __init__(self, name, detected_objects=None, trust_scores=None, user=None):
         """
-        Initialize a Connected Autonomous Vehicle with properties, historical data management, and user-specific settings.
+        Initialize a Connected Autonomous Vehicle with properties, historical data management,
+        and direct access to user-specific settings.
 
         Parameters:
         - name (str): Identifier for the CAV.
         - detected_objects (list, optional): Initial list of objects detected by this CAV.
         - trust_scores (dict, optional): Initial dictionary of trust scores relative to other CAVs.
-        - user_settings (dict, optional): Dictionary containing user-specific settings such as trust thresholds.
+        - user (User, optional): The user object containing specific settings and trust management details.
         """
         self.name = name
         self.detected_objects = detected_objects if detected_objects else []
@@ -19,7 +20,7 @@ class ConnectedAutonomousVehicle:
         self.trust_scores = trust_scores if trust_scores else {}
         self.history_length = 15  # Length to maintain history
         self.shared_info = {}
-        self.user_settings = user_settings if user_settings else {}
+        self.user = user  # Directly use the user object
 
     def update_history(self):
         """Maintain a fixed-length history of detected objects."""
@@ -110,7 +111,7 @@ class ConnectedAutonomousVehicle:
             if len(user.trust_history[self.name]) >= user.trust_frames_required:
                 # Increase trust if the number of consistent events meets the user's required threshold
                 self.trust_scores[other_cav.name] += 0.1  # Increment the trust score
-                user.trust_history[self.name] = []  # Reset the history after updating the trust score
+                # user.trust_history[self.name] = []  # Reset the history after updating the trust score
         else:
             # Log a negative consistency event, potentially leading to a decrease in trust
             user.update_trust_history(self.name, -1)  # Log a negative consistency event
@@ -118,9 +119,9 @@ class ConnectedAutonomousVehicle:
                 # Decrease trust if the number of inconsistent events exceeds the user's tolerance
                 self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Decrement
                 # trust score
-                user.trust_history[self.name] = []  # Reset the history after updating the trust score
+                # user.trust_history[self.name] = []  # Reset the history after updating the trust score
 
-    def assess_trust(self, cav_name, user_name):
+    def assess_trust(self, cav_name, user):
         """
         Assess the trust score for a specific CAV based on the DC trust model.
         This implementation is simplified and should be adapted for specific operational needs.
@@ -134,8 +135,9 @@ class ConnectedAutonomousVehicle:
         if cav_name == self.name:
             return 1.0
 
-        # Example setup to retrieve user-specific settings (like trust thresholds)
-        user_threshold = self.user_settings.get(user_name, {}).get('trust_threshold', 0.5)
+        # Setup to retrieve user-specific settings like trust thresholds and history requirements
+        user_threshold = self.user.trust_level
+        requires_trust_history = self.user.requires_trust_history
 
         # Generate random evidence counts (positive, negative, uncertain)
         positive_evidence = random.randint(0, 10)
@@ -169,6 +171,19 @@ class ConnectedAutonomousVehicle:
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
         # Updating the trust score in the trust_scores dictionary
-        self.trust_scores[cav_name] = omega_ij
+        # Check if the user requires trust history and if the threshold of trust frames is met
+        if requires_trust_history:
+            if self.user.check_trust_frame_threshold(cav_name):
+                # Update trust score conditionally based on user settings
+                self.trust_scores[cav_name] = omega_ij
+                return omega_ij
+            else:
+                # Don't change initialized trust value, but update user history that a trustworthy comparison was made
+                self.user.update_trust_frames_tracker(cav_name)
+                return self.trust_scores.get(cav_name, 0)  # Return existing trust score if threshold not met
 
-        return omega_ij
+        # If User does not require a trust history with the other cav, just update based on the DC model
+        else:
+            # Update trust score directly if no history is required
+            self.trust_scores[cav_name] = omega_ij
+            return omega_ij

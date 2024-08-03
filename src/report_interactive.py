@@ -12,8 +12,8 @@ import os
 # folder = "Sample6"
 # report_json = "Sample6_2024-06-16_18-00-12"
 
-folder = "Sample5"
-report_json = "Sample5_2024-06-16_16-59-23"
+folder = "Sample1"
+report_json = "Sample1_2024-08-03_16-49-40"
 
 file_path = f"results/{folder}/{report_json}.json"
 with open(file_path, "r") as file:
