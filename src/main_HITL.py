@@ -31,9 +31,22 @@ def run_experience(folder):
 
     root_connection = "../data/" + folder
     num_cars = 4
-    user_trust_levels = ['Moderate', 'Cautious', 'Trusting', 'Moderate']  # Define trust levels for each user
-    users = [User(user_id=i, name=f"User{i}", trust_level=user_trust_levels[i-1], requires_trust_history=True,
-                  trust_frames_required=5) for i in range(1, num_cars + 1)]
+    user_trust_levels = [
+        "Moderate",
+        "Cautious",
+        "Trusting",
+        "Moderate",
+    ]  # Define trust levels for each user
+    users = [
+        User(
+            user_id=i,
+            name=f"User{i}",
+            trust_level=user_trust_levels[i - 1],
+            requires_trust_history=True,
+            trust_frames_required=5,
+        )
+        for i in range(1, num_cars + 1)
+    ]
 
     # Assumes the number of images for each Car is the same
     # Determine the number of images by checking the first car's directory
@@ -56,7 +69,7 @@ def run_experience(folder):
             fov=image_paths[i - 1],
             trust_scores=trust_scores_init[f"cav{i}"],
             detected_objects=detected_objects_init[f"cav{i}"],
-            trust_threshold=users[i-1].trust_level,
+            trust_threshold=users[i - 1].trust_level,
             trust_recommendations=trust_recommendations,
         )
         for i in range(1, num_cars + 1)

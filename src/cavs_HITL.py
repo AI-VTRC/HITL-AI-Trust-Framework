@@ -131,14 +131,22 @@ class ConnectedAutonomousVehicle:
                 for obj_2 in objects_detected_by_other_cav:
                     if obj_1["label"] == obj_2["label"]:
                         # Check consistency based on object attributes (e.g., location, type)
-                        if are_objects_consistent(obj_1, obj_2) and user.requires_trust_history:
+                        if (
+                            are_objects_consistent(obj_1, obj_2)
+                            and user.requires_trust_history
+                        ):
                             consistent_objects.append(obj_1)
                             user.update_trust_history(self.name, 1)
 
                             # Check if the number of consistent frames meets the user's required threshold
-                            if len(user.trust_history[self.name]) >= user.trust_frames_required:
+                            if (
+                                len(user.trust_history[self.name])
+                                >= user.trust_frames_required
+                            ):
                                 # Logic to increase trust value here, could be a simple increment or more complex based on user rules
-                                self.trust_scores[other_cav.name] += 0.1  # Example increment, adjust as needed
+                                self.trust_scores[
+                                    other_cav.name
+                                ] += 0.1  # Example increment, adjust as needed
                                 user.trust_history[self.name] = []
 
                             break
