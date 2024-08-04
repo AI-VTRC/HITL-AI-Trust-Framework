@@ -5,14 +5,23 @@ import torch
 from ultralytics import YOLO
 from datetime import datetime
 
-from cavs_HITL import ConnectedAutonomousVehicle
 from user import User
+from cavs_HITL import ConnectedAutonomousVehicle
 from utils import classify_image
 from utils import detect_objects
 from utils import create_cav_objects
 from utils import tuple_to_dict
 from utils import format_to_bullets
 from utils import get_image_count
+
+
+# Define user configurations
+user_configurations = [
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5},
+    {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10},
+    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3},
+    {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0}
+]
 
 
 def run_experience(folder):
@@ -29,24 +38,8 @@ def run_experience(folder):
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "../data/" + folder
+    root_connection = os.path.abspath("assets/data") + os.sep + folder
     num_cars = 4
-    user_trust_levels = [
-        "Moderate",
-        "Cautious",
-        "Trusting",
-        "Moderate",
-    ]  # Define trust levels for each user
-    users = [
-        User(
-            user_id=i,
-            name=f"User{i}",
-            trust_level=user_trust_levels[i - 1],
-            requires_trust_history=True,
-            trust_frames_required=5,
-        )
-        for i in range(1, num_cars + 1)
-    ]
 
     # Assumes the number of images for each Car is the same
     # Determine the number of images by checking the first car's directory
@@ -56,24 +49,25 @@ def run_experience(folder):
     # Initialize trust values for connected agents
     trust_scores_init, detected_objects_init = create_cav_objects(num_cars)
 
-    # Initialize the first set of images for each CAV
-    image_paths = [
-        os.path.join(root_connection, f"Car{i}", "frame_1.jpg")
-        for i in range(1, num_cars + 1)
-    ]
+    # Initialize Users from configurations
+    users = [User(user_id=config['id'], name=config['name'],
+                  trust_level=config['trust_level'],
+                  requires_trust_history=config['requires_trust_history'],
+                  trust_frames_required=config['trust_frames_required'])
+             for config in user_configurations]
 
-    # Initialize CAVs with the first image
-    cavs = [
-        ConnectedAutonomousVehicle(
-            name=f"cav{i}",
-            fov=image_paths[i - 1],
-            trust_scores=trust_scores_init[f"cav{i}"],
-            detected_objects=detected_objects_init[f"cav{i}"],
-            trust_threshold=users[i - 1].trust_level,
-            trust_recommendations=trust_recommendations,
-        )
-        for i in range(1, num_cars + 1)
-    ]
+    # Initialize CAVs and link each with corresponding User
+    image_paths = [os.path.join(root_connection, f"Car{i}", "frame_1.jpg") for i in range(1, len(users) + 1)]
+    cavs = []
+
+    # Initialize CAVs with corresponding User settings
+    for i, user in enumerate(users):
+        cavs.append(ConnectedAutonomousVehicle(
+            name=f"cav{i + 1}",
+            detected_objects=detected_objects_init[f"cav{i + 1}"],
+            trust_scores=trust_scores_init[f"cav{i + 1}"],
+            user=user  # Directly pass the user object if it contains all necessary settings and trackers
+        ))
 
     trust_scores_init = list(trust_scores_init.values())
     cav_names = [cav.name for cav in cavs]
@@ -120,10 +114,16 @@ def run_experience(folder):
             # Update and log trust scores
             for other_cav in cavs:
                 if cav.name != other_cav.name:
-                    cav.share_info(other_cav, users[cavs.index(cav)])
-                    new_trust_score = cav.assess_trust(other_cav.name)
+                    user = users[cavs.index(cav)]  # Ensure the correct user is associated with the cav
+                    cav.share_info(other_cav, user)
+                    # Pass the user's name to the assess_trust method
+                    new_trust_score = cav.assess_trust(other_cav.name, user.name)
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score
+                        if cav.name not in log_data:
+                            log_data[cav.name] = {}
+                        if other_cav.name not in log_data[cav.name]:
+                            log_data[cav.name][other_cav.name] = []
                         log_data[cav.name][other_cav.name].append(new_trust_score)
 
         print(f"Trust Scores after processing image {image_index}:")
@@ -145,7 +145,7 @@ def run_experience(folder):
 
 
 def main():
-    for i in range(4, 6):
+    for i in range(1, 2):  # Simulate only for Sample 1
         run_experience(folder="Sample" + str(i))
         # break
         time.sleep(60)

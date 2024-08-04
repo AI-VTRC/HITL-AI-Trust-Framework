@@ -1,55 +1,143 @@
 import random
-from user import User
-from utils import calculate_overlap
-from utils import are_objects_consistent
+from utils import calculate_overlap, are_objects_consistent
 
 
 class ConnectedAutonomousVehicle:
-    """
-    Represents a Connected Autonomous Vehicle (CAV) and its operations related to object detection, trust assessment,
-    and information sharing with other CAVs.
+    def __init__(self, name, detected_objects=None, trust_scores=None, user=None):
+        """
+        Initialize a Connected Autonomous Vehicle with properties, historical data management,
+        and direct access to user-specific settings.
 
-    @Attributes:
-    - name (str): Unique identifier for the CAV.
-    - fov (str): Field of View for the CAV.
-    - trust_scores (dict): Dictionary containing trust scores for other CAVs.
-    - detected_objects (list): List of objects detected by the CAV.
-    - shared_info (dict): Information that the CAV chooses to share with others.
-    """
-
-    def __init__(
-        self,
-        name,
-        fov,
-        trust_scores,
-        trust_threshold,
-        trust_recommendations,
-        detected_objects=None,
-    ):
+        Parameters:
+        - name (str): Identifier for the CAV.
+        - detected_objects (list, optional): Initial list of objects detected by this CAV.
+        - trust_scores (dict, optional): Initial dictionary of trust scores relative to other CAVs.
+        - user (User, optional): The user object containing specific settings and trust management details.
+        """
         self.name = name
-        self.fov = fov
-        self.trust_scores = trust_scores if trust_scores else {}
         self.detected_objects = detected_objects if detected_objects else []
+        self.previous_detected_objects = []  # Historical data for consistency checks
+        self.trust_scores = trust_scores if trust_scores else {}
+        self.history_length = 15  # Length to maintain history
         self.shared_info = {}
-        self.trust_threshold = trust_threshold
-        self.trust_recommendations = trust_recommendations
+        self.user = user  # Directly use the user object
 
-    def assess_trust(self, cav_name):
+    def update_history(self):
+        """Maintain a fixed-length history of detected objects."""
+        if len(self.previous_detected_objects) >= self.history_length:
+            self.previous_detected_objects.pop(0)
+        self.previous_detected_objects.append(self.detected_objects.copy())
+
+    def share_info(self, other_cav, user):
+        """
+        Share detected objects with another CAV and adjust trust scores based on the consistency of data observed.
+        Includes consideration of scene labels and detection confidence as part of the decision process.
+
+        Parameters:
+        - other_cav (ConnectedAutonomousVehicle): Another CAV to compare detected objects with.
+        - user (User): The user managing this CAV, with specific trust requirements.
+        """
+        # Simulate information reception from other CAV and initial trust assessment
+        received_info = other_cav.shared_info
+        received_scene_label = received_info["scene_label"]
+        received_confidence = received_info["confidence"]
+
+        # Initial trust assessment possibly influenced by scene labels and confidence
+        self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name, user.name)
+
+        # Use received scene label and confidence to filter or adjust the consistency checks
+        if received_scene_label == self.shared_info["scene_label"] \
+                and received_confidence > self.shared_info["confidence"]:
+            current_consistency = self.check_consistency(self.detected_objects, other_cav.detected_objects)
+            historical_consistency = any(
+                self.check_consistency(history_frame, other_cav.detected_objects)
+                for history_frame in self.previous_detected_objects
+            )
+            consistency_factor = (current_consistency or historical_consistency)
+        else:
+            consistency_factor = False
+
+        # Update trust based on user's requirement for historical data and consistency factor
+        if user.requires_trust_history:
+            self.handle_user_history(user, other_cav, consistency_factor)
+        else:
+            if consistency_factor:
+                # If data is consistent, increase trust score slightly
+                self.trust_scores[other_cav.name] += 0.1
+            else:
+                # If data is inconsistent, decrease trust score or maintain current level
+                self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Never drop
+                # below 0
+
+        # Update the history with the latest detected objects
+        self.update_history()
+
+    def check_consistency(self, objects_1, objects_2):
+        """
+        Check for overlap and then consistency between two sets of objects from different CAVs.
+
+        Parameters:
+        - objects_1 (list): Objects detected by this CAV.
+        - objects_2 (list): Objects detected by another CAV.
+
+        Returns:
+        - bool: True if there is an overlap and consistent objects, False otherwise.
+        """
+        # First, calculate if there is any meaningful overlap between the fields of view
+        bboxes1 = [obj['box'] for obj in objects_1]
+        bboxes2 = [obj['box'] for obj in objects_2]
+        overlaps = calculate_overlap(bboxes1, bboxes2)
+
+        # Check if any overlaps are above a certain threshold to consider them meaningful
+        if not any(overlap > 0.1 for overlap in overlaps):  # Assuming 0.1 as a threshold for significant overlap
+            return False  # No significant overlap found, so no consistency check is needed
+
+        # If there is a significant overlap, check for consistency in detected objects
+        return any(obj1['label'] == obj2['label'] and are_objects_consistent(obj1, obj2)
+                   for obj1 in objects_1 for obj2 in objects_2)
+
+    def handle_user_history(self, user, other_cav, is_consistent):
+        """
+        Manage the user's history requirements for trust adjustments based on consistency checks.
+
+        Parameters:
+        - user (User): The user associated with this CAV.
+        - other_cav (ConnectedAutonomousVehicle): The other CAV involved in the trust calculation.
+        - is_consistent (bool): Indicator of whether the current or historical data was consistent.
+        """
+        # Update the trust history based on the current consistency check
+        if is_consistent:
+            user.update_trust_history(self.name, 1)  # Log a positive consistency event
+            if len(user.trust_history[self.name]) >= user.trust_frames_required:
+                # Increase trust if the number of consistent events meets the user's required threshold
+                self.trust_scores[other_cav.name] += 0.1  # Increment the trust score
+                # user.trust_history[self.name] = []  # Reset the history after updating the trust score
+        else:
+            # Log a negative consistency event, potentially leading to a decrease in trust
+            user.update_trust_history(self.name, -1)  # Log a negative consistency event
+            if len(user.trust_history[self.name]) <= -user.trust_frames_required:
+                # Decrease trust if the number of inconsistent events exceeds the user's tolerance
+                self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Decrement
+                # trust score
+                # user.trust_history[self.name] = []  # Reset the history after updating the trust score
+
+    def assess_trust(self, cav_name, user):
         """
         Assess the trust score for a specific CAV based on the DC trust model.
-        In this implementation, a simplified trust assessment model is used which might not reflect real-world complexities.
+        This implementation is simplified and should be adapted for specific operational needs.
 
-        @Parameters:
-        - cav_name (str): The name of the CAV whose trust is being assessed.
+        Parameters:
+        - cav_name (str): The CAV whose trust is being assessed.
 
-        @Returns:
+        Returns:
         - float: Updated trust score for the given CAV.
         """
-        # Simulate trust assessment based on the DC trust model
-        # In this simplified example, we update trust based on received evidence and aij constant
-        # Replace this logic with specific trust assessment rules
-        if cav_name == self.name:  # or cav_name in self.trust_scores
-            return {}
+        if cav_name == self.name:
+            return 1.0
+
+        # Setup to retrieve user-specific settings like trust thresholds and history requirements
+        user_threshold = self.user.trust_level
+        requires_trust_history = self.user.requires_trust_history
 
         # Generate random evidence counts (positive, negative, uncertain)
         positive_evidence = random.randint(0, 10)
@@ -61,10 +149,10 @@ class ConnectedAutonomousVehicle:
 
         # Trust assessment logic
         alpha_ij = (
-            positive_evidence + aij * 10
+                positive_evidence + aij * 10
         )  # considering aij as a weight for pseudo count
         beta_ij = (
-            negative_evidence + (1 - aij) * 10
+                negative_evidence + (1 - aij) * 10
         )  # considering (1-aij) as a weight for pseudo count
         gamma_ij = uncertain_evidence
 
@@ -78,136 +166,24 @@ class ConnectedAutonomousVehicle:
                 trust_score_a = omega_ij
                 trust_score_b = trust_score
                 if (
-                    trust_score_a < self.trust_threshold
-                    and self.trust_threshold <= trust_score_b < 1.0
+                        trust_score_a < user_threshold <= trust_score_b < 1.0
                 ):
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
         # Updating the trust score in the trust_scores dictionary
-        self.trust_scores[cav_name] = omega_ij
+        # Check if the user requires trust history and if the threshold of trust frames is met
+        if requires_trust_history:
+            if self.user.check_trust_frame_threshold(cav_name):
+                # Update trust score conditionally based on user settings
+                self.trust_scores[cav_name] = omega_ij
+                return omega_ij
+            else:
+                # Don't change initialized trust value, but update user history that a trustworthy comparison was made
+                self.user.update_trust_frames_tracker(cav_name)
+                return self.trust_scores.get(cav_name, 0)  # Return existing trust score if threshold not met
 
-        return omega_ij
-
-    def share_info(self, other_cav, user):
-        """
-        Simulate sharing of detected objects and scene information with another CAV.
-        Adjusts trust scores based on consistency of objects detected by both CAVs.
-
-        Parameters:
-        - other_cav (ConnectedAutonomousVehicle): The other CAV to share information with.
-        - user (User): The user associated with this CAV who may adjust trust scores.
-        """
-
-        # Simulate information reception by other CAV and trust assessment
-        received_info = other_cav.shared_info
-        received_scene_label = received_info["scene_label"]
-        received_confidence = received_info["confidence"]
-
-        # Assess trust and update trust scores
-        self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name)
-
-        # Get a list of all bounding boxes detected in FOV1
-        cav1_detections = []
-        for i in range(0, len(self.detected_objects)):
-            cav1_detections.append(self.detected_objects[i]["box"])
-
-        # Get a list of all bounding boxes detected in FOV2
-        cav2_detections = []
-        for i in range(0, len(other_cav.detected_objects)):
-            cav2_detections.append(other_cav.detected_objects[i]["box"])
-
-        # Calculate overlap between two FOVs
-        overlap = calculate_overlap(cav1_detections, cav2_detections)
-
-        # Check if there is overlap between FOVs
-        if any(x > 0.0 for x in overlap):
-            # Check consistency of objects detected by both CAVs
-            objects_detected_by_current_cav = self.detected_objects
-            objects_detected_by_other_cav = other_cav.detected_objects
-
-            # INCLUDE logic that compares shared info as well.
-            consistent_objects = []
-            for obj_1 in objects_detected_by_current_cav:
-                for obj_2 in objects_detected_by_other_cav:
-                    if obj_1["label"] == obj_2["label"]:
-                        # Check consistency based on object attributes (e.g., location, type)
-                        if (
-                            are_objects_consistent(obj_1, obj_2)
-                            and user.requires_trust_history
-                        ):
-                            consistent_objects.append(obj_1)
-                            user.update_trust_history(self.name, 1)
-
-                            # Check if the number of consistent frames meets the user's required threshold
-                            if (
-                                len(user.trust_history[self.name])
-                                >= user.trust_frames_required
-                            ):
-                                # Logic to increase trust value here, could be a simple increment or more complex based on user rules
-                                self.trust_scores[
-                                    other_cav.name
-                                ] += 0.1  # Example increment, adjust as needed
-                                user.trust_history[self.name] = []
-
-                            break
-
-                        elif are_objects_consistent(obj_1, obj_2):
-                            consistent_objects.append(obj_1)
-                            break
-
-            print(f"Overlap detected between {self.name} and {other_cav.name}.")
-            print(f"Detected objects shared by {self.name} include:")
-            for obj in consistent_objects:
-                print(obj)
-
-            # Record consistent objects detected by both CAVs
-            self.detected_objects += consistent_objects
-
-            # Print objects and confidences between the two CAV images
-            print(f"Overlap detected between {self.name} and {other_cav.name}.")
-            print(f"Detected objects by {self.name}:")
-            for obj in self.detected_objects:
-                print(obj)
-            print(f"Detected objects by {other_cav.name}:")
-            for obj in other_cav.detected_objects:
-                print(obj)
-
-            # Update trust recommendations based on trust assessment
-            if self.name not in self.trust_recommendations:
-                self.trust_recommendations[self.name] = {}
-
-            self.trust_recommendations[self.name][other_cav.name] = self.trust_scores[
-                other_cav.name
-            ]  # ADD BREAK POINT HERE
-
-            # Compare shared_info
-            if self.shared_info["scene_label"] == received_scene_label:
-                if received_confidence > self.shared_info["confidence"]:
-                    # Increase the trust value for the other CAV based on some criteria (e.g., by 10%)
-                    trust_increment = 0.10
-                    trust_value = self.trust_recommendations[self.name][
-                        other_cav.name
-                    ]  # ADD BREAK POINT HERE
-                    trust_value += trust_increment  # ADD BREAK POINT HERE
-
-                    # Ensure trust value doesn't exceed 1.0
-                    trust_value = min(trust_value, 1.0)
-
-                    self.trust_recommendations[self.name][other_cav.name] = trust_value
-
+        # If User does not require a trust history with the other cav, just update based on the DC model
         else:
-            # No FOV overlap, recommend trust to other CAV
-            if self.name not in self.trust_recommendations:
-                self.trust_recommendations[self.name] = {}
-            self.trust_recommendations[self.name][other_cav.name] = self.trust_scores[
-                other_cav.name
-            ]
-
-        # Update self.trust_scores based on self.trust_recommendations
-        for cav_name, recommended_trust in self.trust_recommendations[
-            self.name
-        ].items():
-            if cav_name != self.name:  # Exclude the original self
-                self.trust_scores[cav_name] = recommended_trust
-
-        return
+            # Update trust score directly if no history is required
+            self.trust_scores[cav_name] = omega_ij
+            return omega_ij
