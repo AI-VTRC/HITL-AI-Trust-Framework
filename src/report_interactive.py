@@ -1,28 +1,30 @@
 import dash
-from dash import dcc
-from dash import html
+import dash_core_components as dcc
+import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import pandas as pd
 import plotly.graph_objects as go
 import json
 import os
+from flask import send_from_directory
 
 # Load the trust data
-# folder = "Sample6"
-# report_json = "Sample6_2024-06-16_18-00-12"
+folder = "Sample0"
+report_json = "Sample0_2024-08-03_21-11-05_threshold_0.8"
 
-folder = "Sample1"
-report_json = "Sample1_2024-08-03_16-49-40"
+# Assume the current_datetime is known or passed
+current_datetime = "2024-08-03_21-11-05"
+results_dir = f"results/{folder}/{current_datetime}"
 
-file_path = f"results/{folder}/{report_json}.json"
+file_path = os.path.join(results_dir, f"{folder}_{current_datetime}_threshold_0.8.json")
 with open(file_path, "r") as file:
     trust_data = json.load(file)
 
 # Convert the nested dictionary to a DataFrame
 df_list = []
-for cav, trusts in trust_data.items():
-    for other_cav, scores in trusts.items():
+for cav, data in trust_data.items():
+    for other_cav, scores in data["trust_scores"].items():
         for index, score in enumerate(scores):
             df_list.append(
                 {
@@ -37,13 +39,21 @@ df = pd.DataFrame(df_list)
 
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
+
+
+# Serve static images
+@server.route("/results/<folder>/<datetime>/<path:filename>")
+def serve_image(folder, datetime, filename):
+    image_directory = f"results/{folder}/{datetime}"
+    return send_from_directory(image_directory, filename)
 
 
 # Function to get image paths
-def get_image_paths(root_connection, num_cars, num_images):
+def get_image_paths(results_dir, num_cars, num_images):
     image_paths = [
         [
-            os.path.join(root_connection, f"Car{i+1}", f"frame_{j+1}.jpg")
+            os.path.join(results_dir, f"Car{i+1}_frame_{j+1}_with_boxes.jpg")
             for j in range(num_images)
         ]
         for i in range(num_cars)
@@ -52,15 +62,15 @@ def get_image_paths(root_connection, num_cars, num_images):
 
 
 # Get image paths for the scroller
-root_connection = "../data/" + folder
 num_cars = 4
-num_images = len(trust_data["cav1"]["cav2"])
-image_paths = get_image_paths(root_connection, num_cars, num_images)
+num_images = len(trust_data["cav1"]["trust_scores"]["cav2"])
+image_paths = get_image_paths(results_dir, num_cars, num_images)
 
 # Layout of the Dash app
 app.layout = dbc.Container(
     [
         dcc.Store(id="legend-state", data={}),
+        dcc.Store(id="enlarged-image-src", data=""),
         dbc.Row(
             dbc.Col(
                 html.H1("CAV Trust Evaluation Dashboard"),
@@ -97,15 +107,26 @@ app.layout = dbc.Container(
                 dbc.Col(
                     dbc.Card(
                         [
-                            dbc.CardImg(
-                                id=f"car{i+1}-image", top=True, style={"width": "100%"}
+                            html.Div(
+                                dbc.CardImg(
+                                    id=f"car{i+1}-image",
+                                    top=True,
+                                    style={"width": "100%", "cursor": "pointer"},
+                                ),
+                                id=f"car{i+1}-div",
+                                n_clicks=0,
                             ),
                             dbc.CardBody(
-                                html.P(
-                                    f"Car {i+1} - Frame {{image_index}}",
-                                    className="text-center",
+                                html.Div(
+                                    [
+                                        html.P(
+                                            f"Car {i+1} - Frame {{image_index}}",
+                                            className="text-center",
+                                            id=f"car{i+1}-info",
+                                        ),
+                                        html.Ul(id=f"car{i+1}-objects"),
+                                    ]
                                 ),
-                                id=f"car{i+1}-info",
                             ),
                         ],
                         style={
@@ -119,26 +140,66 @@ app.layout = dbc.Container(
             ],
             className="mb-4",
         ),
+        dbc.Row(
+            dbc.Col(
+                html.Img(
+                    id="enlarged-image",
+                    style={
+                        "width": "60%",
+                        "margin-top": "20px",
+                        "display": "block",
+                        "margin-left": "auto",
+                        "margin-right": "auto",
+                    },
+                )
+            )
+        ),
     ],
     fluid=True,
 )
-
 
 # Define outputs for both images and their labels
 output_list = []
 for i in range(num_cars):
     output_list.append(Output(f"car{i+1}-image", "src"))
     output_list.append(Output(f"car{i+1}-info", "children"))
+    output_list.append(Output(f"car{i+1}-objects", "children"))
 
 
 @app.callback(output_list, [Input("image-slider", "value")])
 def update_images_and_labels(image_index):
     updates = []
     for i in range(num_cars):
-        image_src = f"/assets/data/{folder}/Car{i+1}/frame_{image_index}.jpg"
+        image_src = f"results/{folder}/{current_datetime}/Car{i+1}_frame_{image_index}_with_boxes.jpg"
         label = f"Car {i+1} - Frame {image_index}"
-        updates.extend([image_src, label])
+        objects = trust_data[f"cav{i+1}"]["detected_objects"][image_index - 1][
+            "objects"
+        ]
+        object_list = [
+            html.Li(f"{obj['label']}: {obj['confidence']:.2f}") for obj in objects
+        ]
+        updates.extend([image_src, label, object_list])
     return updates
+
+
+# Callback to update the enlarged image when any car image is clicked
+@app.callback(
+    Output("enlarged-image", "src"),
+    [Input(f"car{i+1}-div", "n_clicks") for i in range(num_cars)],
+    [State("image-slider", "value")],
+)
+def enlarge_image(*args):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return ""
+    else:
+        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        car_index = int(
+            triggered_id.replace("car", "").replace("-div", "")
+        )  # Extract car index from id
+        slider_value = int(args[-1])
+        image_src = f"/results/{folder}/{current_datetime}/Car{car_index}_frame_{slider_value}_with_boxes.jpg"
+        return image_src
 
 
 # Update the trust plot based on the slider value

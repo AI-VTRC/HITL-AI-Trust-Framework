@@ -4,6 +4,7 @@ import json
 import torch
 from ultralytics import YOLO
 from datetime import datetime
+import cv2
 
 from cavs import ConnectedAutonomousVehicle
 from utils import classify_image
@@ -61,6 +62,23 @@ def run_experience(folder, trust_threshold):
     trust_scores_init = list(trust_scores_init.values())
     cav_names = [cav.name for cav in cavs]
 
+    # Initialize a logging dictionary
+    log_data = {}
+
+    # Initialize trust score tracking
+    for cav in cavs:
+        log_data[cav.name] = {
+            "trust_scores": {
+                other_cav.name: [] for other_cav in cavs if other_cav.name != cav.name
+            },
+            "detected_objects": [],
+        }
+
+    # Create results directory
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    results_dir = f"results/{folder}/{current_datetime}"
+    os.makedirs(results_dir, exist_ok=True)
+
     # Process FOVs for each CAV at the current time.
     for idx, cav in enumerate(cavs):
         print(f"Processing FOVs for {cav.name}")
@@ -70,23 +88,32 @@ def run_experience(folder, trust_threshold):
         cav.trust_scores = tuple_to_dict(trust_scores_init, cav_names, idx)
 
         # Object Detection
-        cav.detected_objects = detect_objects(image_path, model_object_detection)
+        cav.detected_objects, img_with_boxes = detect_objects(
+            image_path, model_object_detection
+        )
+
+        # Save the image with bounding boxes and labels
+        img_output_path = os.path.join(
+            results_dir, f"Car{idx + 1}_frame_1_with_boxes.jpg"
+        )
+        cv2.imwrite(img_output_path, img_with_boxes)
 
         # Classify Image
         labels, confidences = classify_image(image_path, model_classification)
         cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
-    # Initialize a logging dictionary
-    log_data = {}
-
-    # Initialize trust score tracking
-    for cav in cavs:
-        log_data[cav.name] = {
-            other_cav.name: [] for other_cav in cavs if other_cav.name != cav.name
-        }
+        # Log initial detected objects
+        log_data[cav.name]["detected_objects"].append(
+            {
+                "frame": 1,
+                "objects": cav.detected_objects,
+                "scene_label": labels,
+                "confidence": confidences,
+            }
+        )
 
     # Loop through the remaining images for each CAV
-    for image_index in range(1, num_images + 1):  # Use num_images for accurate count
+    for image_index in range(2, num_images + 1):  # Use num_images for accurate count
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
             image_path = os.path.join(
@@ -96,7 +123,16 @@ def run_experience(folder, trust_threshold):
 
             # Update CAV's fov to the current image
             cav.fov = image_path
-            cav.detected_objects = detect_objects(image_path, model_object_detection)
+            cav.detected_objects, img_with_boxes = detect_objects(
+                image_path, model_object_detection
+            )
+
+            # Save the image with bounding boxes and labels
+            img_output_path = os.path.join(
+                results_dir, f"Car{i + 1}_frame_{image_index}_with_boxes.jpg"
+            )
+            cv2.imwrite(img_output_path, img_with_boxes)
+
             labels, confidences = classify_image(image_path, model_classification)
             cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
@@ -107,7 +143,19 @@ def run_experience(folder, trust_threshold):
                     new_trust_score = cav.assess_trust(other_cav.name)
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score
-                        log_data[cav.name][other_cav.name].append(new_trust_score)
+                        log_data[cav.name]["trust_scores"][other_cav.name].append(
+                            new_trust_score
+                        )
+
+            # Log detected objects
+            log_data[cav.name]["detected_objects"].append(
+                {
+                    "frame": image_index,
+                    "objects": cav.detected_objects,
+                    "scene_label": labels,
+                    "confidence": confidences,
+                }
+            )
 
         print(f"Trust Scores after processing image {image_index}:")
         print(json.dumps({cav.name: cav.trust_scores for cav in cavs}, indent=4))
@@ -115,18 +163,15 @@ def run_experience(folder, trust_threshold):
     # Save the log data to a file or further processing
     print("________________________________")
     print("Final Trust Recommendations:")
-    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = (
-        "results/"
-        + f"{folder}"
-        + f"/{folder}_{current_datetime}_threshold_{trust_threshold}.json"
+    filename = os.path.join(
+        results_dir, f"{folder}_{current_datetime}_threshold_{trust_threshold}.json"
     )
     with open(filename, "w") as file:
         json.dump(log_data, file, indent=4)
 
     print(json.dumps(trust_recommendations, indent=4))
     formatted_data = format_to_bullets(trust_recommendations)
-    result_filename = "results/" + f"{folder}" + f"/{folder}_{current_datetime}.txt"
+    result_filename = os.path.join(results_dir, f"{folder}_{current_datetime}.txt")
     with open(result_filename, "w") as file:
         file.write(formatted_data)
 

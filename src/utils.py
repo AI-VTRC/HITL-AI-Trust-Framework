@@ -81,12 +81,51 @@ def classify_image(image_path, model_classification):
     return first_key, first_value
 
 
-# Function to perform object detection using your specific object detection model
+# # Function to perform object detection using your specific object detection model
+# def detect_objects(image_path, model_object_detection):
+#     """
+#     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
+#     The function relies on a globally-defined object detection model (`model_object_detection`) for predictions. Ensure
+#     that this model is properly initialized and loaded before calling this function.
+
+#     @Parameters:
+#     - image_path (str): Path to the image file on which object detection is to be performed.
+
+#     @Returns:
+#     - list[dict]: A list of dictionaries, where each dictionary represents a detected object and contains:
+#         - 'label' (str): Name of the detected object.
+#         - 'confidence' (float): Confidence score of the detection.
+#         - 'box' (list[float]): Coordinates of the bounding box in the format [x1, y1, x2, y2].
+#     """
+#     # Perform object detection using YOLO
+#     results = model_object_detection(image_path)
+
+#     # Process YOLO predictions to extract object information
+#     detected_objects = []
+
+#     # Iterate over the results
+#     for result in results:
+#         # Extracting labels, confidences, and boxes
+#         for box in result.boxes:
+#             label_index = box.cls.item()  # Get class label as the index
+#             label_name = result.names[
+#                 label_index
+#             ]  # Map index to the corresponding name
+
+#             output = {
+#                 "label": label_name,  # Replace with the mapped name
+#                 "confidence": box.conf.item(),  # Confidence score of the detection
+#                 "box": box.xyxy.cpu().tolist(),  # Coordinates of the bounding box
+#             }
+#             detected_objects.append(output)  # Append each object inside the inner loop
+
+#     return detected_objects
+
+
 def detect_objects(image_path, model_object_detection):
     """
     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
-    The function relies on a globally-defined object detection model (`model_object_detection`) for predictions. Ensure
-    that this model is properly initialized and loaded before calling this function.
+    The function relies on a globally-defined object detection model (`model_object_detection`) for predictions.
 
     @Parameters:
     - image_path (str): Path to the image file on which object detection is to be performed.
@@ -96,7 +135,11 @@ def detect_objects(image_path, model_object_detection):
         - 'label' (str): Name of the detected object.
         - 'confidence' (float): Confidence score of the detection.
         - 'box' (list[float]): Coordinates of the bounding box in the format [x1, y1, x2, y2].
+    - np.array: The image with bounding boxes and labels drawn on it.
     """
+    # Load image
+    img = cv2.imread(image_path)
+
     # Perform object detection using YOLO
     results = model_object_detection(image_path)
 
@@ -112,14 +155,25 @@ def detect_objects(image_path, model_object_detection):
                 label_index
             ]  # Map index to the corresponding name
 
-            output = {
-                "label": label_name,  # Replace with the mapped name
-                "confidence": box.conf.item(),  # Confidence score of the detection
-                "box": box.xyxy.cpu().tolist(),  # Coordinates of the bounding box
-            }
-            detected_objects.append(output)  # Append each object inside the inner loop
+            confidence = box.conf.item()
+            coordinates = box.xyxy.cpu().tolist()
 
-    return detected_objects
+            output = {
+                "label": label_name,
+                "confidence": confidence,
+                "box": coordinates,
+            }
+            detected_objects.append(output)
+
+            # Draw bounding box and label on the image
+            x1, y1, x2, y2 = map(int, coordinates[0])
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            label = f"{label_name}: {confidence:.2f}"
+            cv2.putText(
+                img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
+            )
+
+    return detected_objects, img
 
 
 def tuple_to_dict(trust_tuples, cav_names, obj_index):
