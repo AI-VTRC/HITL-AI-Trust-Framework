@@ -32,7 +32,7 @@ class ConnectedAutonomousVehicle:
             self.previous_detected_objects.pop(0)
         self.previous_detected_objects.append(self.detected_objects.copy())
 
-    def share_info(self, other_cav, user):
+    def share_info(self, other_cav, user, self_detected_objects, other_detected_objects):
         """
         Share detected objects with another CAV and adjust trust scores based on the consistency of data observed.
         Includes consideration of scene labels and detection confidence as part of the decision process.
@@ -47,7 +47,8 @@ class ConnectedAutonomousVehicle:
         received_confidence = received_info["confidence"]
 
         # Initial trust assessment possibly influenced by scene labels and confidence
-        self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name, user.name)
+        self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name, user.name, self_detected_objects,
+                                                              other_detected_objects)
 
         # Use received scene label and confidence to filter or adjust the consistency checks
         if received_scene_label == self.shared_info["scene_label"] \
@@ -174,16 +175,12 @@ class ConnectedAutonomousVehicle:
                 ):
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
-        # Bring the images with bboxes from Self_CAV vs Other_CAV
-        self_detected_objects = self_detected_objects[1]
-        other_detected_objects = other_detected_objects[1]
-
-        if self.user.trust_monitor:
-            subprocess.run(['python', 'main.py', folder, self_detected_objects, other_detected_objects])
+        #if self.user.trust_monitor:
+        #    subprocess.run(['python', 'main.py', folder, self_detected_objects, other_detected_objects])
 
         # Updating the trust score in the trust_scores dictionary
         # Check if the user requires trust history and if the threshold of trust frames is met
-        elif requires_trust_history:
+        if requires_trust_history:
             if self.user.check_trust_frame_threshold(cav_name):
                 # Update trust score conditionally based on user settings
                 self.trust_scores[cav_name] = omega_ij

@@ -7,6 +7,9 @@ import argparse
 
 class PhotoTrustApp:
     def __init__(self, root, folder, self_detected_objects, other_detected_objects):
+
+        # need to pass the path of the images being compared.
+
         self.root = root
         self.root.title("Photo Trust Application")
         root_connection = os.path.join(r'D:\HITL-AI-Trust-Framework\src\assets\data', folder)

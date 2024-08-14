@@ -122,7 +122,7 @@ def classify_image(image_path, model_classification):
 #     return detected_objects
 
 
-def detect_objects(image_path, model_object_detection):
+def detect_objects(image_path, model_object_detection, output_dir):
     """
     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
     The function relies on a globally-defined object detection model (`model_object_detection`) for predictions.
@@ -140,40 +140,39 @@ def detect_objects(image_path, model_object_detection):
     # Load image
     img = cv2.imread(image_path)
 
-    # Perform object detection using YOLO
+    # Perform object detection using the model
     results = model_object_detection(image_path)
 
-    # Process YOLO predictions to extract object information
+    # Process predictions to extract object information
     detected_objects = []
 
-    # Iterate over the results
     for result in results:
-        # Extracting labels, confidences, and boxes
         for box in result.boxes:
-            label_index = box.cls.item()  # Get class label as the index
-            label_name = result.names[
-                label_index
-            ]  # Map index to the corresponding name
-
+            label_index = box.cls.item()  # Get class label as an index
+            label_name = result.names[label_index]  # Map index to name
             confidence = box.conf.item()
             coordinates = box.xyxy.cpu().tolist()
 
-            output = {
+            # Add detection info to list
+            detected_objects.append({
                 "label": label_name,
                 "confidence": confidence,
                 "box": coordinates,
-            }
-            detected_objects.append(output)
+            })
 
             # Draw bounding box and label on the image
             x1, y1, x2, y2 = map(int, coordinates[0])
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            label = f"{label_name}: {confidence:.2f}"
-            cv2.putText(
-                img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
-            )
+            label_text = f"{label_name}: {confidence:.2f}"
+            cv2.putText(img, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    return detected_objects, img
+    # Construct the output image path
+    output_image_path = os.path.join(output_dir, os.path.basename(image_path))
+
+    # Save the modified image
+    cv2.imwrite(output_image_path, img)
+
+    return detected_objects, output_image_path
 
 
 def tuple_to_dict(trust_tuples, cav_names, obj_index):

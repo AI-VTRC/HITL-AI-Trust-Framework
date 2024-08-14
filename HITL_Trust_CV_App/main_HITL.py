@@ -14,6 +14,7 @@ from utils import tuple_to_dict
 from utils import format_to_bullets
 from utils import get_image_count
 
+temp_dir = r'D:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
 
 # Define user configurations
 user_configurations = [
@@ -83,7 +84,15 @@ def run_experience(folder):
         cav.trust_scores = tuple_to_dict(trust_scores_init, cav_names, idx)
 
         # Object Detection
-        cav.detected_objects = detect_objects(image_path, model_object_detection)
+        detected_objects, saved_image_path = detect_objects(image_path, model_object_detection, temp_dir)
+
+        # Rename the image file to match the CAV name and frame number
+        new_image_name = f"{cav.name}_frame_{1}.jpg"
+        new_image_path = os.path.join(temp_dir, new_image_name)
+        os.rename(saved_image_path, new_image_path)
+
+        # Update the cav's detected_objects with the new image path
+        cav.detected_objects = (detected_objects, new_image_path)
 
         # Classify Image
         labels, confidences = classify_image(image_path, model_classification)
@@ -103,13 +112,22 @@ def run_experience(folder):
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
             image_path = os.path.join(
-                root_connection, f"Car{i + 1}", f"frame_{image_index}.jpg"
+                temp_dir, f"cav{i + 1}_frame_{image_index}.jpg"
             )
             print(f"Processing {cav.name} with image {image_path}")
 
             # Update CAV's fov to the current image
             cav.fov = image_path
-            cav.detected_objects = detect_objects(image_path, model_object_detection)
+            detected_objects, saved_image_path = detect_objects(image_path, model_object_detection, temp_dir)
+
+            # Rename the image file to match the CAV name and frame number
+            new_image_name = f"{cav.name}_frame_{image_index}.jpg"
+            new_image_path = os.path.join(temp_dir, new_image_name)
+            os.rename(saved_image_path, new_image_path)
+
+            # Update the cav's detected_objects with the new image path
+            cav.detected_objects = (detected_objects, new_image_path)
+
             labels, confidences = classify_image(image_path, model_classification)
             cav.shared_info = {"scene_label": labels, "confidence": confidences}
 
@@ -117,10 +135,13 @@ def run_experience(folder):
             for other_cav in cavs:
                 if cav.name != other_cav.name:
                     user = users[cavs.index(cav)]  # Ensure the correct user is associated with the cav
-                    cav.share_info(other_cav, user)
+
+                    #### DEBUG HERE ####
+
+                    cav.share_info(other_cav, user, cav.detected_objects[1], other_cav.detected_objects[1])
                     # Pass the user's name to the assess_trust method
-                    new_trust_score = cav.assess_trust(other_cav.name, user.name, cav.detected_objects,
-                                                       other_cav.detected_objects)
+                    new_trust_score = cav.assess_trust(other_cav.name, user.name, cav.detected_objects[1],
+                                                       other_cav.detected_objects[1])
 
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score
