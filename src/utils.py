@@ -98,8 +98,8 @@ def detect_objects(image_path, model_object_detection):
     # Load image
     img = cv2.imread(image_path)
 
-    # Perform object detection using YOLO
-    results = model_object_detection(image_path)
+    # Perform object detection using YOLO - Class sport ball
+    results = model_object_detection(image_path, classes=[32])
 
     # Process YOLO predictions to extract object information
     detected_objects = []

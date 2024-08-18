@@ -13,11 +13,11 @@ from flask import send_from_directory
 # folder = "Sample0"
 # report_json = "Sample0_2024-08-03_21-11-05_threshold_0.8"
 folder = "8_18_24_scenario_1"
-report_json = "8_18_24_scenario_1_2024-08-18_17-19-07_threshold_0.8"
+report_json = "8_18_24_scenario_1_2024-08-18_17-52-11_threshold_0.8"
 
 # Assume the current_datetime is known or passed
 # current_datetime = "2024-08-03_21-11-05"
-current_datetime = "2024-08-18_17-19-07"
+current_datetime = "2024-08-18_17-52-11"
 results_dir = f"results/{folder}/{current_datetime}"
 
 file_path = os.path.join(results_dir, f"{folder}_{current_datetime}_threshold_0.8.json")
