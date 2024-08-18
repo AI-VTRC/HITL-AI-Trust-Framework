@@ -181,8 +181,9 @@ def main():
     trust_thresholds = [0.8]
 
     for trust_threshold in trust_thresholds:
-        for i in range(7):
-            run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
+        for i in range(2):
+            # run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
+            run_experience(folder="8_18_24_scenario_" + str(i + 1), trust_threshold=trust_threshold)
             # break
             time.sleep(10)
 

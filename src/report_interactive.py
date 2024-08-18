@@ -10,11 +10,14 @@ import os
 from flask import send_from_directory
 
 # Load the trust data
-folder = "Sample0"
-report_json = "Sample0_2024-08-03_21-11-05_threshold_0.8"
+# folder = "Sample0"
+# report_json = "Sample0_2024-08-03_21-11-05_threshold_0.8"
+folder = "8_18_24_scenario_1"
+report_json = "8_18_24_scenario_1_2024-08-18_17-19-07_threshold_0.8"
 
 # Assume the current_datetime is known or passed
-current_datetime = "2024-08-03_21-11-05"
+# current_datetime = "2024-08-03_21-11-05"
+current_datetime = "2024-08-18_17-19-07"
 results_dir = f"results/{folder}/{current_datetime}"
 
 file_path = os.path.join(results_dir, f"{folder}_{current_datetime}_threshold_0.8.json")
@@ -146,6 +149,21 @@ app.layout = dbc.Container(
                     id="enlarged-image",
                     style={
                         "width": "60%",
+                        "margin-top": "20px",
+                        "display": "block",
+                        "margin-left": "auto",
+                        "margin-right": "auto",
+                    },
+                )
+            )
+        ),
+        dbc.Row(html.Div(style={"height": "40px"})),
+        dbc.Row(
+            dbc.Col(
+                html.Img(
+                    src=f'assets/data/{folder}/{folder}.jpg',
+                    style={
+                        "width": "20%",
                         "margin-top": "20px",
                         "display": "block",
                         "margin-left": "auto",
