@@ -18,7 +18,8 @@ temp_dir = r'D:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
 
 # Define user configurations
 user_configurations = [
-    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5},
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5,
+     'trust_monitor': True},
     {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10},
     {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3},
     {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0}
@@ -112,7 +113,7 @@ def run_experience(folder):
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
             image_path = os.path.join(
-                temp_dir, f"cav{i + 1}_frame_{image_index}.jpg"
+                root_connection, f"Car{i + 1}", f"frame_{image_index}.jpg"
             )
             print(f"Processing {cav.name} with image {image_path}")
 
@@ -123,7 +124,7 @@ def run_experience(folder):
             # Rename the image file to match the CAV name and frame number
             new_image_name = f"{cav.name}_frame_{image_index}.jpg"
             new_image_path = os.path.join(temp_dir, new_image_name)
-            os.rename(saved_image_path, new_image_path)
+            os.replace(saved_image_path, new_image_path)
 
             # Update the cav's detected_objects with the new image path
             cav.detected_objects = (detected_objects, new_image_path)
@@ -135,11 +136,9 @@ def run_experience(folder):
             for other_cav in cavs:
                 if cav.name != other_cav.name:
                     user = users[cavs.index(cav)]  # Ensure the correct user is associated with the cav
-
-                    #### DEBUG HERE ####
+                    # Pass the user's name to the assess_trust method
 
                     cav.share_info(other_cav, user, cav.detected_objects[1], other_cav.detected_objects[1])
-                    # Pass the user's name to the assess_trust method
                     new_trust_score = cav.assess_trust(other_cav.name, user.name, cav.detected_objects[1],
                                                        other_cav.detected_objects[1])
 

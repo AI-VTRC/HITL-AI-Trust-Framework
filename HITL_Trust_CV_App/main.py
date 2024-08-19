@@ -1,27 +1,24 @@
 import tkinter as tk
 from tkinter import Scale, Button, Label
 from PIL import Image, ImageTk
-import os
+import tempfile
 import argparse
 
 
 class PhotoTrustApp:
-    def __init__(self, root, folder, self_detected_objects, other_detected_objects):
+    def __init__(self, root, cav_name, other_cav_name, self_detected_objects, other_detected_objects):
 
         # need to pass the path of the images being compared.
 
         self.root = root
         self.root.title("Photo Trust Application")
-        root_connection = os.path.join(r'D:\HITL-AI-Trust-Framework\src\assets\data', folder)
 
         # Add labels above the images
-        self.label_cav1 = Label(root, text="CAV1/User1", font=("Arial", 14))
+        self.label_cav1 = Label(root, text=cav_name, font=("Arial", 14))
         self.label_cav1.grid(row=0, column=0, pady=10)
 
-        self.label_cav2 = Label(root, text="CAV2", font=("Arial", 14))
+        self.label_cav2 = Label(root, text=other_cav_name, font=("Arial", 14))
         self.label_cav2.grid(row=0, column=1, pady=10)
-
-        image_path1 = os.path.join(root_connection, f"Car{1}", f"frame_{1}.jpg")
 
         # Load and display the first image
         self.image1 = Image.open(self_detected_objects)
@@ -29,8 +26,6 @@ class PhotoTrustApp:
         self.photo1 = ImageTk.PhotoImage(self.image1)
         self.label1 = tk.Label(root, image=self.photo1)
         self.label1.grid(row=1, column=0)
-
-        image_path2 = os.path.join(root_connection, f"Car{2}", f"frame_{1}.jpg")
 
         # Load and display the second image
         self.image2 = Image.open(other_detected_objects)
@@ -54,20 +49,28 @@ class PhotoTrustApp:
     def override_trust(self):
         trust_value = self.scale.get()
         print(f"Trust value set to: {trust_value}")
-        # Implement additional logic here if needed
+        # Create a temporary file to store the trust value
+        with tempfile.NamedTemporaryFile(delete=False, mode='w') as tf:
+            tf.write(str(trust_value))
+            temp_path = tf.name  # Save the path to pass to the main application
+        self.temp_file_path = temp_path  # Store the path for other operations
+        self.root.quit()  # Quit after setting the value
 
     def next_connection(self):
-        # Logic to handle the next connection can be implemented here
         print("Next connection button pressed")
+        self.root.quit()  # This quits the tkinter mainloop
+        self.root.destroy()  # This destroys the window, ensuring it closes cleanly
 
 
 if __name__ == "__main__":
-    # Parse command line arguments
     parser = argparse.ArgumentParser(description="Run CAV Trust Monitor")
-    parser.add_argument("folder", type=str, help="Folder name containing images")
+    parser.add_argument("cav_name", type=str, help="Name of CAV Monitoring Incoming Transmission")
+    parser.add_argument("other_cav_name", type=str, help="Name of incoming CAV sender")
+    parser.add_argument("self_detected_image", type=str, help="Path to the image for self detected objects")
+    parser.add_argument("other_detected_image", type=str, help="Path to the image for other detected objects")
+
     args = parser.parse_args()
 
-    # Initialize the application with the specified folder
     root = tk.Tk()
-    app = PhotoTrustApp(root, args.folder, args.self_detected_objects, args.other_detected_objects)
+    app = PhotoTrustApp(root, args.cav_name, args.other_cav_name, args.self_detected_image, args.other_detected_image)
     root.mainloop()

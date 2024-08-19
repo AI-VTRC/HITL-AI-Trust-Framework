@@ -1,5 +1,7 @@
+import os
 import random
 import subprocess
+from PIL import Image, ImageTk
 from utils import calculate_overlap, are_objects_consistent
 
 
@@ -30,7 +32,7 @@ class ConnectedAutonomousVehicle:
         """Maintain a fixed-length history of detected objects."""
         if len(self.previous_detected_objects) >= self.history_length:
             self.previous_detected_objects.pop(0)
-        self.previous_detected_objects.append(self.detected_objects.copy())
+        self.previous_detected_objects.append(self.detected_objects[0].copy())
 
     def share_info(self, other_cav, user, self_detected_objects, other_detected_objects):
         """
@@ -175,8 +177,14 @@ class ConnectedAutonomousVehicle:
                 ):
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
-        #if self.user.trust_monitor:
-        #    subprocess.run(['python', 'main.py', folder, self_detected_objects, other_detected_objects])
+        if self.user.trust_monitor:
+            subprocess.run(['python', 'main.py', self.name, cav_name, self_detected_objects, other_detected_objects])
+
+            # Check for a temporary file containing an overridden trust value
+            if hasattr(user, 'temp_file_path') and os.path.exists(user.temp_file_path):
+                with open(user.temp_file_path, 'r') as file:
+                    omega_ij = float(file.read().strip())  # Override the trust score
+                os.unlink(user.temp_file_path)  # Remove the file to clean up
 
         # Updating the trust score in the trust_scores dictionary
         # Check if the user requires trust history and if the threshold of trust frames is met
