@@ -14,6 +14,7 @@ from utils import tuple_to_dict
 from utils import format_to_bullets
 from utils import get_image_count
 
+# Set a temporary user directory that will add images with bounding box visualizations on them.
 temp_dir = r'D:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
 
 # Define user configurations
