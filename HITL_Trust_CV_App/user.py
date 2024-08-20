@@ -5,7 +5,8 @@ class User:
         'Trusting': 0.3
     }
 
-    def __init__(self, user_id, name, trust_level='Moderate', requires_trust_history=False, trust_frames_required=10):
+    def __init__(self, user_id, name, trust_level='Moderate', requires_trust_history=False, trust_frames_required=10,
+                 trust_monitor=False):
         """
         Initialize a new user associated with CAV operations.
 
@@ -28,8 +29,8 @@ class User:
         self.trust_frames_required = trust_frames_required
         self.trust_frames_tracker = {}
         self.trust_overrides = {}  # Dictionary to store user's trust overrides by CAV id
-        self.trust_history = {}    # Dictionary to store history of trust values per CAV
-        self.trust_monitor = False
+        self.trust_history = {}  # Dictionary to store history of trust values per CAV
+        self.trust_monitor = trust_monitor
 
     def update_trust_frames_tracker(self, cav_id):
         """

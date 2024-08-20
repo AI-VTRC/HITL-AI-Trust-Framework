@@ -13,17 +13,22 @@ from utils import create_cav_objects
 from utils import tuple_to_dict
 from utils import format_to_bullets
 from utils import get_image_count
+from utils import clear_directory
 
 # Set a temporary user directory that will add images with bounding box visualizations on them.
 temp_dir = r'D:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
+clear_directory(temp_dir)
 
 # Define user configurations
 user_configurations = [
-    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5,
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0,
      'trust_monitor': True},
-    {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10},
-    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3},
-    {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0}
+    {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10,
+     'trust_monitor': False},
+    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3,
+     'trust_monitor': False},
+    {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0,
+     'trust_monitor': False}
 ]
 
 
@@ -56,10 +61,9 @@ def run_experience(folder):
     users = [User(user_id=config['id'], name=config['name'],
                   trust_level=config['trust_level'],
                   requires_trust_history=config['requires_trust_history'],
-                  trust_frames_required=config['trust_frames_required'])
+                  trust_frames_required=config['trust_frames_required'],
+                  trust_monitor=config['trust_monitor'])
              for config in user_configurations]
-
-    users[0].trust_monitor = True
 
     # Initialize CAVs and link each with corresponding User
     image_paths = [os.path.join(root_connection, f"Car{i}", "frame_1.jpg") for i in range(1, len(users) + 1)]
@@ -139,9 +143,8 @@ def run_experience(folder):
                     user = users[cavs.index(cav)]  # Ensure the correct user is associated with the cav
                     # Pass the user's name to the assess_trust method
 
-                    cav.share_info(other_cav, user, cav.detected_objects[1], other_cav.detected_objects[1])
-                    new_trust_score = cav.assess_trust(other_cav.name, user.name, cav.detected_objects[1],
-                                                       other_cav.detected_objects[1])
+                    new_trust_score = cav.share_info(other_cav, user, cav.detected_objects[1],
+                                                     other_cav.detected_objects[1])
 
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score

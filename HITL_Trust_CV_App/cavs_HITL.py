@@ -2,8 +2,7 @@ import os
 import random
 import subprocess
 from PIL import Image, ImageTk
-from utils import calculate_overlap, are_objects_consistent
-
+from utils import calculate_overlap, are_objects_consistent, read_and_delete_temp_file
 
 folder = "Sample1"
 
@@ -49,8 +48,10 @@ class ConnectedAutonomousVehicle:
         received_confidence = received_info["confidence"]
 
         # Initial trust assessment possibly influenced by scene labels and confidence
-        self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name, user.name, self_detected_objects,
-                                                              other_detected_objects)
+        self.trust_scores[other_cav.name], override_flag = self.assess_trust(other_cav.name, user.name,
+                                                                             self_detected_objects,
+                                                                             other_detected_objects)
+        omega_ij = self.trust_scores[other_cav.name]
 
         # Use received scene label and confidence to filter or adjust the consistency checks
         if received_scene_label == self.shared_info["scene_label"] \
@@ -68,16 +69,23 @@ class ConnectedAutonomousVehicle:
         if user.requires_trust_history:
             self.handle_user_history(user, other_cav, consistency_factor)
         else:
-            if consistency_factor:
+            if consistency_factor and override_flag == False:
                 # If data is consistent, increase trust score slightly
                 self.trust_scores[other_cav.name] += 0.1
+            if consistency_factor and override_flag == True:
+                pass
             else:
-                # If data is inconsistent, decrease trust score or maintain current level
-                self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Never drop
-                # below 0
+                # Trust was user overriden. Make trust value what user specified
+                if override_flag:
+                    pass
+                else:
+                    # If data is inconsistent, decrease trust score or maintain current level
+                    self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Never drop
+                    # below 0
 
         # Update the history with the latest detected objects
         self.update_history()
+        return omega_ij
 
     def check_consistency(self, objects_1, objects_2):
         """
@@ -91,9 +99,12 @@ class ConnectedAutonomousVehicle:
         - bool: True if there is an overlap and consistent objects, False otherwise.
         """
         # First, calculate if there is any meaningful overlap between the fields of view
-        bboxes1 = [obj['box'] for obj in objects_1]
-        bboxes2 = [obj['box'] for obj in objects_2]
-        overlaps = calculate_overlap(bboxes1, bboxes2)
+        try:
+            bboxes1 = [obj['box'] for obj in objects_1]
+            bboxes2 = [obj['box'] for obj in objects_2]
+            overlaps = calculate_overlap(bboxes1, bboxes2)
+        except TypeError:
+            return False  # No overlap detected; return false for no consistency
 
         # Check if any overlaps are above a certain threshold to consider them meaningful
         if not any(overlap > 0.1 for overlap in overlaps):  # Assuming 0.1 as a threshold for significant overlap
@@ -142,6 +153,8 @@ class ConnectedAutonomousVehicle:
         if cav_name == self.name:
             return 1.0
 
+        override = False
+
         # Setup to retrieve user-specific settings like trust thresholds and history requirements
         user_threshold = self.user.trust_level
         requires_trust_history = self.user.requires_trust_history
@@ -178,13 +191,11 @@ class ConnectedAutonomousVehicle:
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
         if self.user.trust_monitor:
-            subprocess.run(['python', 'main.py', self.name, cav_name, self_detected_objects, other_detected_objects])
+            subprocess.run(['python', 'main.py', self.name, cav_name, str(omega_ij), self_detected_objects,
+                            other_detected_objects])
 
             # Check for a temporary file containing an overridden trust value
-            if hasattr(user, 'temp_file_path') and os.path.exists(user.temp_file_path):
-                with open(user.temp_file_path, 'r') as file:
-                    omega_ij = float(file.read().strip())  # Override the trust score
-                os.unlink(user.temp_file_path)  # Remove the file to clean up
+            omega_ij, override = read_and_delete_temp_file(omega_ij)  # Override the trust score
 
         # Updating the trust score in the trust_scores dictionary
         # Check if the user requires trust history and if the threshold of trust frames is met
@@ -192,14 +203,14 @@ class ConnectedAutonomousVehicle:
             if self.user.check_trust_frame_threshold(cav_name):
                 # Update trust score conditionally based on user settings
                 self.trust_scores[cav_name] = omega_ij
-                return omega_ij
+                return omega_ij, override
             else:
                 # Don't change initialized trust value, but update user history that a trustworthy comparison was made
                 self.user.update_trust_frames_tracker(cav_name)
-                return self.trust_scores.get(cav_name, 0)  # Return existing trust score if threshold not met
+                return self.trust_scores.get(cav_name, 0), override  # Return existing trust score if threshold not met
 
         # If User does not require a trust history with the other cav, just update based on the DC model
         else:
             # Update trust score directly if no history is required
             self.trust_scores[cav_name] = omega_ij
-            return omega_ij
+            return omega_ij, override

@@ -180,12 +180,48 @@ def tuple_to_dict(trust_tuples, cav_names, obj_index):
     obj_dict = {}
 
     # Get other objects except the current one
-    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1 :]
+    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1:]
 
     for idx, other_obj in enumerate(other_objects):
         obj_dict[other_obj] = trust_tuples[obj_index][idx]
 
     return obj_dict
+
+
+def clear_directory(directory):
+    # Check if the directory is empty
+    if os.listdir(directory):
+        # Directory is not empty, proceed to clear it
+        print("Temp directory is not empty, removing files...")
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)  # Removes files or links
+                elif os.path.isdir(file_path):
+                    os.rmdir(file_path)  # Removes empty directories
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
+    else:
+        # Directory is empty
+        print("Directory is already empty.")
+
+
+def read_and_delete_temp_file(default_value):
+    temp_filename = 'temp_trust_value.txt'
+    try:
+        if os.path.exists(temp_filename):
+            with open(temp_filename, 'r') as f:
+                omega_ij = float(f.read().strip())
+                print(f"Read overridden trust value: {omega_ij}")
+            os.remove(temp_filename)
+            print("Temporary file deleted.")
+            return omega_ij, True  # Return the new value and True indicating an override occurred
+        else:
+            print("No temporary file found. Using default trust value.")
+    except Exception as e:
+        print(f"Error accessing the temporary file: {e}")
+    return default_value, False  # Return the default value and False if no file exists or in case of an error
 
 
 def create_cav_objects(num_cavs):
