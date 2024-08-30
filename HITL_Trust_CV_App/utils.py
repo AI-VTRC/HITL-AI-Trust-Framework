@@ -80,7 +80,49 @@ def classify_image(image_path, model_classification):
 
     return first_key, first_value
 
-def detect_objects(image_path, model_object_detection):
+
+# # Function to perform object detection using your specific object detection model
+# def detect_objects(image_path, model_object_detection):
+#     """
+#     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
+#     The function relies on a globally-defined object detection model (`model_object_detection`) for predictions. Ensure
+#     that this model is properly initialized and loaded before calling this function.
+
+#     @Parameters:
+#     - image_path (str): Path to the image file on which object detection is to be performed.
+
+#     @Returns:
+#     - list[dict]: A list of dictionaries, where each dictionary represents a detected object and contains:
+#         - 'label' (str): Name of the detected object.
+#         - 'confidence' (float): Confidence score of the detection.
+#         - 'box' (list[float]): Coordinates of the bounding box in the format [x1, y1, x2, y2].
+#     """
+#     # Perform object detection using YOLO
+#     results = model_object_detection(image_path)
+
+#     # Process YOLO predictions to extract object information
+#     detected_objects = []
+
+#     # Iterate over the results
+#     for result in results:
+#         # Extracting labels, confidences, and boxes
+#         for box in result.boxes:
+#             label_index = box.cls.item()  # Get class label as the index
+#             label_name = result.names[
+#                 label_index
+#             ]  # Map index to the corresponding name
+
+#             output = {
+#                 "label": label_name,  # Replace with the mapped name
+#                 "confidence": box.conf.item(),  # Confidence score of the detection
+#                 "box": box.xyxy.cpu().tolist(),  # Coordinates of the bounding box
+#             }
+#             detected_objects.append(output)  # Append each object inside the inner loop
+
+#     return detected_objects
+
+
+def detect_objects(image_path, model_object_detection, output_dir):
     """
     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
     The function relies on a globally-defined object detection model (`model_object_detection`) for predictions.
@@ -98,40 +140,39 @@ def detect_objects(image_path, model_object_detection):
     # Load image
     img = cv2.imread(image_path)
 
-    # Perform object detection using YOLO - Class sport ball
-    results = model_object_detection(image_path, classes=[39])
+    # Perform object detection using the model
+    results = model_object_detection(image_path)
 
-    # Process YOLO predictions to extract object information
+    # Process predictions to extract object information
     detected_objects = []
 
-    # Iterate over the results
     for result in results:
-        # Extracting labels, confidences, and boxes
         for box in result.boxes:
-            label_index = box.cls.item()  # Get class label as the index
-            label_name = result.names[
-                label_index
-            ]  # Map index to the corresponding name
-
+            label_index = box.cls.item()  # Get class label as an index
+            label_name = result.names[label_index]  # Map index to name
             confidence = box.conf.item()
             coordinates = box.xyxy.cpu().tolist()
 
-            output = {
+            # Add detection info to list
+            detected_objects.append({
                 "label": label_name,
                 "confidence": confidence,
                 "box": coordinates,
-            }
-            detected_objects.append(output)
+            })
 
             # Draw bounding box and label on the image
             x1, y1, x2, y2 = map(int, coordinates[0])
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            label = f"{label_name}: {confidence:.2f}"
-            cv2.putText(
-                img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2
-            )
+            label_text = f"{label_name}: {confidence:.2f}"
+            cv2.putText(img, label_text, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    return detected_objects, img
+    # Construct the output image path
+    output_image_path = os.path.join(output_dir, os.path.basename(image_path))
+
+    # Save the modified image
+    cv2.imwrite(output_image_path, img)
+
+    return detected_objects, output_image_path
 
 
 def tuple_to_dict(trust_tuples, cav_names, obj_index):
@@ -139,12 +180,48 @@ def tuple_to_dict(trust_tuples, cav_names, obj_index):
     obj_dict = {}
 
     # Get other objects except the current one
-    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1 :]
+    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1:]
 
     for idx, other_obj in enumerate(other_objects):
         obj_dict[other_obj] = trust_tuples[obj_index][idx]
 
     return obj_dict
+
+
+def clear_directory(directory):
+    # Check if the directory is empty
+    if os.listdir(directory):
+        # Directory is not empty, proceed to clear it
+        print("Temp directory is not empty, removing files...")
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)  # Removes files or links
+                elif os.path.isdir(file_path):
+                    os.rmdir(file_path)  # Removes empty directories
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
+    else:
+        # Directory is empty
+        print("Directory is already empty.")
+
+
+def read_and_delete_temp_file(default_value):
+    temp_filename = 'temp_trust_value.txt'
+    try:
+        if os.path.exists(temp_filename):
+            with open(temp_filename, 'r') as f:
+                omega_ij = float(f.read().strip())
+                print(f"Read overridden trust value: {omega_ij}")
+            os.remove(temp_filename)
+            print("Temporary file deleted.")
+            return omega_ij, True  # Return the new value and True indicating an override occurred
+        else:
+            print("No temporary file found. Using default trust value.")
+    except Exception as e:
+        print(f"Error accessing the temporary file: {e}")
+    return default_value, False  # Return the default value and False if no file exists or in case of an error
 
 
 def create_cav_objects(num_cavs):
