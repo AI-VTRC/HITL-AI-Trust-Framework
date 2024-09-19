@@ -14,7 +14,7 @@ from hitl_utils import classify_image, detect_objects, create_cav_objects, tuple
 # Define possible values for trust configuration
 trust_levels = ['Cautious', 'Moderate', 'Trusting']
 requires_trust_history_options = [True, False]
-trust_frames_required_options = [0, 3, 5, 10]  # Example trust frame values
+trust_frames_required_options = [0, 3, 5, 10]  
 
 def run_experience(folder, user_configurations):
     """Main Driver"""
@@ -179,14 +179,13 @@ def main():
         folder_name = f"8_29_24_scenario_1"
         print(f"Running experience for: {folder_name}")
         run_experience(folder=folder_name, user_configurations=user_configurations)
-        time.sleep(10)  # Pause between runs if necessary
+        time.sleep(1)  # Pause between runs if necessary
         
         counter += 1
         
-        # Can run all combination later
-        if counter == 3:
-            break
-
+        # # Can run all combination later
+        # if counter == 3:
+        #     break
 
 if __name__ == "__main__":
     main()

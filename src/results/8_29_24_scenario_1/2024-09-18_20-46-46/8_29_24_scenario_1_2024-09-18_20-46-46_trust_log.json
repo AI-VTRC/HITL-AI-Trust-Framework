@@ -1,0 +1,545 @@
+{
+    "cav1": {
+        "human_trust_level": 0.6,
+        "trust_scores": {
+            "cav2": [
+                0.33,
+                0.33,
+                0.17886414441669485,
+                0.23589942501934905,
+                0.28099650026438144,
+                0.7238135026599462,
+                0.6,
+                0.6,
+                0.6173557574580699
+            ],
+            "cav3": [
+                0.33,
+                0.33,
+                0.5011530334282337,
+                0.3062876221370244,
+                0.39491207028573405,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav4": [
+                0.34,
+                0.34,
+                0.504912303421755,
+                0.42655404505771066,
+                0.3108436106137699,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ]
+        },
+        "detected_objects": [
+            {
+                "frame": 1,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.3668787181377411,
+                        "box": [
+                            [
+                                719.8309936523438,
+                                664.5648193359375,
+                                898.9026489257812,
+                                1145.621337890625
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 8.027798652648926
+            },
+            {
+                "frame": 2,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.6942054629325867,
+                        "box": [
+                            [
+                                554.9688720703125,
+                                654.0535278320312,
+                                728.7653198242188,
+                                1133.46044921875
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 9.568717002868652
+            },
+            {
+                "frame": 3,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.26776525378227234,
+                        "box": [
+                            [
+                                304.4195251464844,
+                                642.234375,
+                                477.9939880371094,
+                                1128.0128173828125
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 9.08607006072998
+            },
+            {
+                "frame": 4,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.4521690309047699,
+                        "box": [
+                            [
+                                77.2782211303711,
+                                643.5443115234375,
+                                249.4972381591797,
+                                1122.8082275390625
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "perfume",
+                "confidence": 7.062845706939697
+            },
+            {
+                "frame": 5,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 4.818885326385498
+            },
+            {
+                "frame": 6,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 6.809925079345703
+            },
+            {
+                "frame": 7,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 5.12933349609375
+            },
+            {
+                "frame": 8,
+                "objects": [],
+                "scene_label": "lighthouse",
+                "confidence": 6.107935905456543
+            },
+            {
+                "frame": 9,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 6.252439022064209
+            },
+            {
+                "frame": 10,
+                "objects": [],
+                "scene_label": "albatross",
+                "confidence": 5.674679279327393
+            }
+        ]
+    },
+    "cav2": {
+        "human_trust_level": 0.6,
+        "trust_scores": {
+            "cav1": [
+                0.33,
+                0.33,
+                0.5452508761296206,
+                0.6,
+                0.8677785122213539,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav3": [
+                0.33,
+                0.33,
+                0.2847352543368667,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.70821246740624
+            ],
+            "cav4": [
+                0.34,
+                0.34,
+                0.6397492106599675,
+                0.6,
+                0.6,
+                0.7065466804099924,
+                0.6,
+                0.6,
+                0.6
+            ]
+        },
+        "detected_objects": [
+            {
+                "frame": 1,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.8941806554794312,
+                        "box": [
+                            [
+                                670.0079956054688,
+                                178.6329345703125,
+                                1080.0,
+                                1345.7608642578125
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 9.195980072021484
+            },
+            {
+                "frame": 2,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.9424511790275574,
+                        "box": [
+                            [
+                                286.3424377441406,
+                                192.523681640625,
+                                715.941162109375,
+                                1342.6453857421875
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 10.938824653625488
+            },
+            {
+                "frame": 3,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.6947113871574402,
+                        "box": [
+                            [
+                                2.94415283203125,
+                                171.7862548828125,
+                                279.1449279785156,
+                                1332.7178955078125
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 13.559309959411621
+            },
+            {
+                "frame": 4,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.820388793945312
+            },
+            {
+                "frame": 5,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.23200798034668
+            },
+            {
+                "frame": 6,
+                "objects": [],
+                "scene_label": "balance beam",
+                "confidence": 7.189682483673096
+            },
+            {
+                "frame": 7,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 7.20995569229126
+            },
+            {
+                "frame": 8,
+                "objects": [],
+                "scene_label": "balance beam",
+                "confidence": 8.569972038269043
+            },
+            {
+                "frame": 9,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 7.2676825523376465
+            },
+            {
+                "frame": 10,
+                "objects": [],
+                "scene_label": "lighthouse",
+                "confidence": 6.011443614959717
+            }
+        ]
+    },
+    "cav3": {
+        "human_trust_level": 0.6,
+        "trust_scores": {
+            "cav1": [
+                0.33,
+                0.33,
+                0.2173635639194396,
+                0.35688737955121624,
+                0.28780326878651424,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav2": [
+                0.33,
+                0.33,
+                0.3494172789236146,
+                0.40761880639178427,
+                0.12900639265666322,
+                0.7059157042673799,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav4": [
+                0.34,
+                0.34,
+                0.42783152538818653,
+                0.44579764062485966,
+                0.6272334694190776,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ]
+        },
+        "detected_objects": [
+            {
+                "frame": 1,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 4.7863545417785645
+            },
+            {
+                "frame": 2,
+                "objects": [],
+                "scene_label": "balance beam",
+                "confidence": 6.565318584442139
+            },
+            {
+                "frame": 3,
+                "objects": [],
+                "scene_label": "grey whale",
+                "confidence": 7.14039945602417
+            },
+            {
+                "frame": 4,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 6.3544087409973145
+            },
+            {
+                "frame": 5,
+                "objects": [],
+                "scene_label": "albatross",
+                "confidence": 7.035452842712402
+            },
+            {
+                "frame": 6,
+                "objects": [],
+                "scene_label": "lighthouse",
+                "confidence": 5.518005847930908
+            },
+            {
+                "frame": 7,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.224205017089844
+            },
+            {
+                "frame": 8,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.9112932085990906,
+                        "box": [
+                            [
+                                592.2171020507812,
+                                236.61199951171875,
+                                1028.9132080078125,
+                                1456.4688720703125
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 10.683916091918945
+            },
+            {
+                "frame": 9,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.9567975997924805,
+                        "box": [
+                            [
+                                63.393951416015625,
+                                203.3726806640625,
+                                501.5340576171875,
+                                1471.6531982421875
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "pill bottle",
+                "confidence": 9.756589889526367
+            },
+            {
+                "frame": 10,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.158683776855469
+            }
+        ]
+    },
+    "cav4": {
+        "human_trust_level": 0.6,
+        "trust_scores": {
+            "cav1": [
+                0.33,
+                0.33,
+                0.6831325795088056,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav2": [
+                0.33,
+                0.33,
+                0.6,
+                0.6,
+                0.6,
+                0.6604963907105785,
+                0.6,
+                0.6,
+                0.6
+            ],
+            "cav3": [
+                0.34,
+                0.34,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6,
+                0.6
+            ]
+        },
+        "detected_objects": [
+            {
+                "frame": 1,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 7.0612616539001465
+            },
+            {
+                "frame": 2,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.845672607421875
+            },
+            {
+                "frame": 3,
+                "objects": [],
+                "scene_label": "lighthouse",
+                "confidence": 4.702418804168701
+            },
+            {
+                "frame": 4,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 10.533089637756348
+            },
+            {
+                "frame": 5,
+                "objects": [],
+                "scene_label": "parallel bars",
+                "confidence": 8.284131050109863
+            },
+            {
+                "frame": 6,
+                "objects": [],
+                "scene_label": "balance beam",
+                "confidence": 8.450358390808105
+            },
+            {
+                "frame": 7,
+                "objects": [],
+                "scene_label": "pill bottle",
+                "confidence": 11.831113815307617
+            },
+            {
+                "frame": 8,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.748489260673523,
+                        "box": [
+                            [
+                                668.1820678710938,
+                                665.1875610351562,
+                                853.4718017578125,
+                                1155.5875244140625
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "perfume",
+                "confidence": 8.65439510345459
+            },
+            {
+                "frame": 9,
+                "objects": [],
+                "scene_label": "perfume",
+                "confidence": 7.555623531341553
+            },
+            {
+                "frame": 10,
+                "objects": [
+                    {
+                        "label": "bottle",
+                        "confidence": 0.6338322758674622,
+                        "box": [
+                            [
+                                35.2855224609375,
+                                625.8570556640625,
+                                221.74887084960938,
+                                1122.28857421875
+                            ]
+                        ]
+                    }
+                ],
+                "scene_label": "nipple",
+                "confidence": 7.245142936706543
+            }
+        ]
+    }
+}
