@@ -16,18 +16,18 @@ from utils import get_image_count
 from utils import clear_directory
 
 # Set a temporary user directory that will add images with bounding box visualizations on them.
-temp_dir = r'D:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
+temp_dir = r'C:\HITL-AI-Trust-Framework\HITL_Trust_CV_App\temp'
 clear_directory(temp_dir)
 
 # Define user configurations
 user_configurations = [
-    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0,
+    {'id': 1, 'name': 'User1', 'trust_level': 'Moderate', 'requires_trust_history': True, 'trust_frames_required': 5,
      'trust_monitor': True},
-    {'id': 2, 'name': 'User2', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 10,
+    {'id': 2, 'name': 'User2', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 8,
      'trust_monitor': False},
-    {'id': 3, 'name': 'User3', 'trust_level': 'Trusting', 'requires_trust_history': True, 'trust_frames_required': 3,
+    {'id': 3, 'name': 'User3', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 6,
      'trust_monitor': False},
-    {'id': 4, 'name': 'User4', 'trust_level': 'Moderate', 'requires_trust_history': False, 'trust_frames_required': 0,
+    {'id': 4, 'name': 'User4', 'trust_level': 'Cautious', 'requires_trust_history': True, 'trust_frames_required': 8,
      'trust_monitor': False}
 ]
 
@@ -46,7 +46,7 @@ def run_experience(folder):
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = r'D:\HITL-AI-Trust-Framework\src\assets\data' + os.sep + folder
+    root_connection = r'C:\HITL-AI-Trust-Framework\src\assets\data' + os.sep + folder
     num_cars = 4
 
     # Assumes the number of images for each Car is the same
@@ -173,7 +173,7 @@ def run_experience(folder):
 
 
 def main():
-    for i in range(1, 2):  # Simulate only for Sample 1
+    for i in range(5, 6):  # Simulate only for Sample 4
         run_experience(folder="Sample" + str(i))
         # break
         time.sleep(60)
