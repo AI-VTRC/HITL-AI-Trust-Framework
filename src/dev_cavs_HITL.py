@@ -46,14 +46,18 @@ class ConnectedAutonomousVehicle:
         self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name, user.name)
 
         # Use received scene label and confidence to filter or adjust the consistency checks
-        if received_scene_label == self.shared_info["scene_label"] \
-                and received_confidence > self.shared_info["confidence"]:
-            current_consistency = self.check_consistency(self.detected_objects, other_cav.detected_objects)
+        if (
+            received_scene_label == self.shared_info["scene_label"]
+            and received_confidence > self.shared_info["confidence"]
+        ):
+            current_consistency = self.check_consistency(
+                self.detected_objects, other_cav.detected_objects
+            )
             historical_consistency = any(
                 self.check_consistency(history_frame, other_cav.detected_objects)
                 for history_frame in self.previous_detected_objects
             )
-            consistency_factor = (current_consistency or historical_consistency)
+            consistency_factor = current_consistency or historical_consistency
         else:
             consistency_factor = False
 
@@ -66,7 +70,9 @@ class ConnectedAutonomousVehicle:
                 self.trust_scores[other_cav.name] += 0.1
             else:
                 # If data is inconsistent, decrease trust score or maintain current level
-                self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Never drop
+                self.trust_scores[other_cav.name] = max(
+                    self.trust_scores[other_cav.name] - 0.1, 0
+                )  # Never drop
                 # below 0
 
         # Update the history with the latest detected objects
@@ -84,17 +90,24 @@ class ConnectedAutonomousVehicle:
         - bool: True if there is an overlap and consistent objects, False otherwise.
         """
         # First, calculate if there is any meaningful overlap between the fields of view
-        bboxes1 = [obj['box'] for obj in objects_1]
-        bboxes2 = [obj['box'] for obj in objects_2]
+        bboxes1 = [obj["box"] for obj in objects_1]
+        bboxes2 = [obj["box"] for obj in objects_2]
         overlaps = calculate_overlap(bboxes1, bboxes2)
 
         # Check if any overlaps are above a certain threshold to consider them meaningful
-        if not any(overlap > 0.1 for overlap in overlaps):  # Assuming 0.1 as a threshold for significant overlap
-            return False  # No significant overlap found, so no consistency check is needed
+        if not any(
+            overlap > 0.1 for overlap in overlaps
+        ):  # Assuming 0.1 as a threshold for significant overlap
+            return (
+                False  # No significant overlap found, so no consistency check is needed
+            )
 
         # If there is a significant overlap, check for consistency in detected objects
-        return any(obj1['label'] == obj2['label'] and are_objects_consistent(obj1, obj2)
-                   for obj1 in objects_1 for obj2 in objects_2)
+        return any(
+            obj1["label"] == obj2["label"] and are_objects_consistent(obj1, obj2)
+            for obj1 in objects_1
+            for obj2 in objects_2
+        )
 
     def handle_user_history(self, user, other_cav, is_consistent):
         """
@@ -117,7 +130,9 @@ class ConnectedAutonomousVehicle:
             user.update_trust_history(self.name, -1)  # Log a negative consistency event
             if len(user.trust_history[self.name]) <= -user.trust_frames_required:
                 # Decrease trust if the number of inconsistent events exceeds the user's tolerance
-                self.trust_scores[other_cav.name] = max(self.trust_scores[other_cav.name] - 0.1, 0)  # Decrement
+                self.trust_scores[other_cav.name] = max(
+                    self.trust_scores[other_cav.name] - 0.1, 0
+                )  # Decrement
                 # trust score
                 # user.trust_history[self.name] = []  # Reset the history after updating the trust score
 
@@ -149,10 +164,10 @@ class ConnectedAutonomousVehicle:
 
         # Trust assessment logic
         alpha_ij = (
-                positive_evidence + aij * 10
+            positive_evidence + aij * 10
         )  # considering aij as a weight for pseudo count
         beta_ij = (
-                negative_evidence + (1 - aij) * 10
+            negative_evidence + (1 - aij) * 10
         )  # considering (1-aij) as a weight for pseudo count
         gamma_ij = uncertain_evidence
 
@@ -165,9 +180,7 @@ class ConnectedAutonomousVehicle:
             if other_cav_name != cav_name:
                 trust_score_a = omega_ij
                 trust_score_b = trust_score
-                if (
-                        trust_score_a < user_threshold <= trust_score_b < 1.0
-                ):
+                if trust_score_a < user_threshold <= trust_score_b < 1.0:
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
         # Updating the trust score in the trust_scores dictionary
@@ -180,7 +193,9 @@ class ConnectedAutonomousVehicle:
             else:
                 # Don't change initialized trust value, but update user history that a trustworthy comparison was made
                 self.user.update_trust_frames_tracker(cav_name)
-                return self.trust_scores.get(cav_name, 0)  # Return existing trust score if threshold not met
+                return self.trust_scores.get(
+                    cav_name, 0
+                )  # Return existing trust score if threshold not met
 
         # If User does not require a trust history with the other cav, just update based on the DC model
         else:

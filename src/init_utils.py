@@ -80,6 +80,7 @@ def classify_image(image_path, model_classification):
 
     return first_key, first_value
 
+
 def detect_objects(image_path, model_object_detection):
     """
     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
