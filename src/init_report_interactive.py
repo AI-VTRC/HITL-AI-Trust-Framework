@@ -10,6 +10,7 @@ import os
 from flask import send_from_directory
 import re
 
+
 # Function to get available folders, current_datetime, and report JSON files
 def get_available_reports(results_base_dir="results"):
     folders = []
@@ -23,28 +24,34 @@ def get_available_reports(results_base_dir="results"):
             if os.path.isdir(folder_path):
                 folders.append(folder)
                 data[folder] = []
-                
+
                 # Look inside the folder for the current_datetime subfolder
                 for subfolder in os.listdir(folder_path):
                     subfolder_path = os.path.join(folder_path, subfolder)
-                    if os.path.isdir(subfolder_path) and re.match(r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$", subfolder):
+                    if os.path.isdir(subfolder_path) and re.match(
+                        r"^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$", subfolder
+                    ):
                         current_datetime = subfolder
-                        
+
                         # Look for JSON files in the current_datetime subfolder
                         for report_file in os.listdir(subfolder_path):
                             if report_file.endswith(".json"):
-                                data[folder].append({
-                                    "current_datetime": current_datetime,
-                                    "report_json": report_file
-                                })
-    
+                                data[folder].append(
+                                    {
+                                        "current_datetime": current_datetime,
+                                        "report_json": report_file,
+                                    }
+                                )
+
     return folders, data
+
 
 folders, data = get_available_reports()
 
 # Initialize the Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
+
 
 # Function to get image paths dynamically based on selections
 def get_image_paths(results_dir, num_cars, num_images):
@@ -57,11 +64,13 @@ def get_image_paths(results_dir, num_cars, num_images):
     ]
     return image_paths
 
+
 # Serve static images
 @server.route("/results/<folder>/<datetime>/<path:filename>")
 def serve_image(folder, datetime, filename):
     image_directory = f"results/{folder}/{datetime}"
     return send_from_directory(image_directory, filename)
+
 
 # Add dropdowns for dynamic selection of folder, datetime, and report JSON
 app.layout = dbc.Container(
@@ -80,7 +89,9 @@ app.layout = dbc.Container(
                 dbc.Col(
                     dcc.Dropdown(
                         id="folder-dropdown",
-                        options=[{"label": folder, "value": folder} for folder in folders],
+                        options=[
+                            {"label": folder, "value": folder} for folder in folders
+                        ],
                         value=folders[0],  # Default to the first folder
                         placeholder="Select Folder",
                     ),
@@ -190,43 +201,61 @@ app.layout = dbc.Container(
     fluid=True,
 )
 
+
 # Callback to update the datetime and report dropdowns when a folder is selected
 @app.callback(
-    [Output("datetime-dropdown", "options"),
-     Output("datetime-dropdown", "value"),
-     Output("folder-image", "src")],  # Update folder image
+    [
+        Output("datetime-dropdown", "options"),
+        Output("datetime-dropdown", "value"),
+        Output("folder-image", "src"),
+    ],  # Update folder image
     [Input("folder-dropdown", "value")],
 )
 def update_datetime_dropdown(selected_folder):
     if selected_folder:
-        datetime_options = [{"label": entry["current_datetime"], "value": entry["current_datetime"]} for entry in data[selected_folder]]
+        datetime_options = [
+            {"label": entry["current_datetime"], "value": entry["current_datetime"]}
+            for entry in data[selected_folder]
+        ]
         folder_image_src = f"/assets/data/{selected_folder}/{selected_folder}.jpg"  # Update image source
-        return datetime_options, datetime_options[0]["value"] if datetime_options else None, folder_image_src
+        return (
+            datetime_options,
+            datetime_options[0]["value"] if datetime_options else None,
+            folder_image_src,
+        )
     return [], None, None
+
 
 # Callback to update the report dropdown when a datetime is selected
 @app.callback(
-    [Output("report-dropdown", "options"),
-     Output("report-dropdown", "value")],
-    [Input("folder-dropdown", "value"),
-     Input("datetime-dropdown", "value")],
+    [Output("report-dropdown", "options"), Output("report-dropdown", "value")],
+    [Input("folder-dropdown", "value"), Input("datetime-dropdown", "value")],
 )
 def update_report_dropdown(selected_folder, selected_datetime):
     if selected_folder and selected_datetime:
-        report_options = [{"label": entry["report_json"], "value": entry["report_json"]} for entry in data[selected_folder] if entry["current_datetime"] == selected_datetime]
+        report_options = [
+            {"label": entry["report_json"], "value": entry["report_json"]}
+            for entry in data[selected_folder]
+            if entry["current_datetime"] == selected_datetime
+        ]
         return report_options, report_options[0]["value"] if report_options else None
     return [], None
 
+
 # Callback to update the image slider and load the JSON data when the report is selected
 @app.callback(
-    [Output("image-slider", "max"),
-     Output("image-slider", "marks"),
-     Output("trust-plot", "figure"),
-     *[Output(f"car{i+1}-image", "src") for i in range(4)]],  # Update car images
-    [Input("folder-dropdown", "value"),
-     Input("datetime-dropdown", "value"),
-     Input("report-dropdown", "value"),
-     Input("image-slider", "value")],
+    [
+        Output("image-slider", "max"),
+        Output("image-slider", "marks"),
+        Output("trust-plot", "figure"),
+        *[Output(f"car{i+1}-image", "src") for i in range(4)],
+    ],  # Update car images
+    [
+        Input("folder-dropdown", "value"),
+        Input("datetime-dropdown", "value"),
+        Input("report-dropdown", "value"),
+        Input("image-slider", "value"),
+    ],
 )
 def update_content(selected_folder, selected_datetime, selected_report, image_index):
     if not all([selected_folder, selected_datetime, selected_report]):
@@ -255,12 +284,15 @@ def update_content(selected_folder, selected_datetime, selected_report, image_in
     # Get the number of images and image paths
     num_images = len(trust_data["cav1"]["trust_scores"]["cav2"])
     slider_marks = {i: str(i) for i in range(1, num_images + 1)}
-    
+
     results_dir = f"results/{selected_folder}/{selected_datetime}"
     image_paths = get_image_paths(results_dir, 4, num_images)  # Assuming 4 cars
-    
+
     # Get the image sources for the current slider value
-    image_sources = [f"/results/{selected_folder}/{selected_datetime}/Car{i+1}_frame_{image_index}_with_boxes.jpg" for i in range(4)]
+    image_sources = [
+        f"/results/{selected_folder}/{selected_datetime}/Car{i+1}_frame_{image_index}_with_boxes.jpg"
+        for i in range(4)
+    ]
 
     # Create the trust plot
     fig = go.Figure()
@@ -291,7 +323,7 @@ def update_content(selected_folder, selected_datetime, selected_report, image_in
         yaxis_title="Trust Score",
         template="plotly_dark",
     )
-    
+
     return num_images, slider_marks, fig, *image_sources
 
 

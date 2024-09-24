@@ -77,9 +77,7 @@ class ConnectedAutonomousVehicle:
             if other_cav_name != cav_name:
                 trust_score_a = omega_ij
                 trust_score_b = trust_score
-                if (
-                        trust_score_a < self.trust_threshold <= trust_score_b < 1.0
-                ):
+                if trust_score_a < self.trust_threshold <= trust_score_b < 1.0:
                     omega_ij = 0.6  # Set to a higher value to trust the other CAV
 
         # Updating the trust score in the trust_scores dictionary
@@ -104,24 +102,38 @@ class ConnectedAutonomousVehicle:
         self.trust_scores[other_cav.name] = self.assess_trust(other_cav.name)
 
         # Current frame overlap and consistency check
-        current_overlap = calculate_overlap([obj["box"] for obj in self.detected_objects],
-                                            [obj["box"] for obj in other_cav.detected_objects])
+        current_overlap = calculate_overlap(
+            [obj["box"] for obj in self.detected_objects],
+            [obj["box"] for obj in other_cav.detected_objects],
+        )
         current_consistent = False
         if any(current_overlap):
             for obj_1, obj_2 in zip(self.detected_objects, other_cav.detected_objects):
-                if obj_1["label"] == obj_2["label"] and are_objects_consistent(obj_1, obj_2):
+                if obj_1["label"] == obj_2["label"] and are_objects_consistent(
+                    obj_1, obj_2
+                ):
                     current_consistent = True
-                    if self.process_consistency(obj_1, obj_2, user, received_confidence):
+                    if self.process_consistency(
+                        obj_1, obj_2, user, received_confidence
+                    ):
                         break  # Exit after processing the first consistent match
 
-        if not current_consistent and hasattr(self, 'previous_detected_objects'):
+        if not current_consistent and hasattr(self, "previous_detected_objects"):
             # Check historical data for consistency
-            historical_overlap = calculate_overlap([obj["box"] for obj in self.previous_detected_objects],
-                                                   [obj["box"] for obj in other_cav.detected_objects])
+            historical_overlap = calculate_overlap(
+                [obj["box"] for obj in self.previous_detected_objects],
+                [obj["box"] for obj in other_cav.detected_objects],
+            )
             if any(historical_overlap):
-                for obj_1, obj_2 in zip(self.previous_detected_objects, other_cav.detected_objects):
-                    if obj_1["label"] == obj_2["label"] and are_objects_consistent(obj_1, obj_2):
-                        if self.process_consistency(obj_1, obj_2, user, received_confidence):
+                for obj_1, obj_2 in zip(
+                    self.previous_detected_objects, other_cav.detected_objects
+                ):
+                    if obj_1["label"] == obj_2["label"] and are_objects_consistent(
+                        obj_1, obj_2
+                    ):
+                        if self.process_consistency(
+                            obj_1, obj_2, user, received_confidence
+                        ):
                             break  # Exit after processing the first historical consistent match
 
         # Store the current detected objects for future historical checks
@@ -139,7 +151,9 @@ class ConnectedAutonomousVehicle:
             user.update_trust_history(self.name, 1)
             if len(user.trust_history[self.name]) >= user.trust_frames_required:
                 increment = 0.1 + (received_confidence - 0.5) * 0.05
-                self.trust_scores[other_cav.name] += max(0, increment)  # Ensure no negative increment
+                self.trust_scores[other_cav.name] += max(
+                    0, increment
+                )  # Ensure no negative increment
                 user.trust_history[self.name] = []  # Reset the trust history
                 return True
         else:
