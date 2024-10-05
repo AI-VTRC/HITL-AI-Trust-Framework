@@ -9,12 +9,20 @@ import cv2
 
 from hitl_user import User
 from hitl_cavs import ConnectedAutonomousVehicle
-from hitl_utils import classify_image, detect_objects, create_cav_objects, tuple_to_dict, format_to_bullets, get_image_count
+from hitl_utils import (
+    classify_image,
+    detect_objects,
+    create_cav_objects,
+    tuple_to_dict,
+    format_to_bullets,
+    get_image_count,
+)
 
 # Define possible values for trust configuration
-trust_levels = ['Cautious', 'Moderate', 'Trusting']
+trust_levels = ["Cautious", "Moderate", "Trusting"]
 requires_trust_history_options = [True, False]
-trust_frames_required_options = [0, 3, 5, 10]  
+trust_frames_required_options = [0, 3, 5, 10]
+
 
 def run_experience(folder, user_configurations):
     """Main Driver"""
@@ -41,24 +49,34 @@ def run_experience(folder, user_configurations):
     trust_scores_init, detected_objects_init = create_cav_objects(num_cars)
 
     # Initialize Users from configurations
-    users = [User(user_id=config['id'], name=config['name'],
-                  trust_level=config['trust_level'],
-                  requires_trust_history=config['requires_trust_history'],
-                  trust_frames_required=config['trust_frames_required'])
-             for config in user_configurations]
+    users = [
+        User(
+            user_id=config["id"],
+            name=config["name"],
+            trust_level=config["trust_level"],
+            requires_trust_history=config["requires_trust_history"],
+            trust_frames_required=config["trust_frames_required"],
+        )
+        for config in user_configurations
+    ]
 
     # Initialize CAVs and link each with corresponding User
-    image_paths = [os.path.join(root_connection, f"Car{i}", "frame_1.jpg") for i in range(1, len(users) + 1)]
+    image_paths = [
+        os.path.join(root_connection, f"Car{i}", "frame_1.jpg")
+        for i in range(1, len(users) + 1)
+    ]
     cavs = []
 
     # Initialize CAVs with corresponding User settings
     for i, user in enumerate(users):
-        cavs.append(ConnectedAutonomousVehicle(
-            name=f"cav{i + 1}",
-            detected_objects=detected_objects_init[f"cav{i + 1}"],
-            trust_scores=trust_scores_init[f"cav{i + 1}"],
-            user=user  # Directly pass the user object if it contains all necessary settings and trackers
-        ))
+        cavs.append(
+            ConnectedAutonomousVehicle(
+                name=f"cav{i + 1}",
+                detected_objects=detected_objects_init[f"cav{i + 1}"],
+                trust_scores=trust_scores_init[f"cav{i + 1}"],
+                user=user,  # Directly pass the user object if it contains all necessary settings and trackers
+            )
+        )
 
     trust_scores_init = list(trust_scores_init.values())
     cav_names = [cav.name for cav in cavs]
@@ -69,14 +87,20 @@ def run_experience(folder, user_configurations):
     # Initialize trust score tracking and log for detected objects
     for cav in cavs:
         log_data[cav.name] = {
-            "human_trust_level": cav.user.trust_level if cav.user else None,  # Log human trust level if available
-            "trust_scores": {other_cav.name: [] for other_cav in cavs if other_cav.name != cav.name},
-            "detected_objects": []
+            "human_trust_level": (
+                cav.user.trust_level if cav.user else None
+            ),  # Log human trust level if available
+            "requires_trust_history": cav.user.requires_trust_history,  # Log if user requires trust history
+            "trust_frames_required": cav.user.trust_frames_required,  # Log required trust frames
+            "trust_scores": {
+                other_cav.name: [] for other_cav in cavs if other_cav.name != cav.name
+            },
+            "detected_objects": [],
         }
 
     # Create results directory
     current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    results_dir = f"results/{folder}/{current_datetime}"
+    results_dir = f"results_new_1/{folder}/{current_datetime}"
     os.makedirs(results_dir, exist_ok=True)
 
     # Process FOVs for each CAV at the current time
@@ -87,10 +111,14 @@ def run_experience(folder, user_configurations):
         cav.trust_scores = tuple_to_dict(trust_scores_init, cav_names, idx)
 
         # Object Detection
-        cav.detected_objects, img_with_boxes = detect_objects(image_path, model_object_detection)
+        cav.detected_objects, img_with_boxes = detect_objects(
+            image_path, model_object_detection
+        )
 
         # Save the image with bounding boxes and labels
-        img_output_path = os.path.join(results_dir, f"Car{idx + 1}_frame_1_with_boxes.jpg")
+        img_output_path = os.path.join(
+            results_dir, f"Car{idx + 1}_frame_1_with_boxes.jpg"
+        )
         cv2.imwrite(img_output_path, img_with_boxes)
 
         # Classify Image
@@ -103,7 +131,7 @@ def run_experience(folder, user_configurations):
                 "frame": 1,
                 "objects": cav.detected_objects,
                 "scene_label": labels,
-                "confidence": confidences
+                "confidence": confidences,
             }
         )
 
@@ -111,15 +139,21 @@ def run_experience(folder, user_configurations):
     for image_index in range(2, num_images + 1):  # Use num_images for accurate count
         for i, cav in enumerate(cavs):
             # Construct the path for the current image
-            image_path = os.path.join(root_connection, f"Car{i + 1}", f"frame_{image_index}.jpg")
+            image_path = os.path.join(
+                root_connection, f"Car{i + 1}", f"frame_{image_index}.jpg"
+            )
             print(f"Processing {cav.name} with image {image_path}")
 
             # Update CAV's fov to the current image
             cav.fov = image_path
-            cav.detected_objects, img_with_boxes = detect_objects(image_path, model_object_detection)
+            cav.detected_objects, img_with_boxes = detect_objects(
+                image_path, model_object_detection
+            )
 
             # Save the image with bounding boxes and labels
-            img_output_path = os.path.join(results_dir, f"Car{i + 1}_frame_{image_index}_with_boxes.jpg")
+            img_output_path = os.path.join(
+                results_dir, f"Car{i + 1}_frame_{image_index}_with_boxes.jpg"
+            )
             cv2.imwrite(img_output_path, img_with_boxes)
 
             labels, confidences = classify_image(image_path, model_classification)
@@ -133,7 +167,9 @@ def run_experience(folder, user_configurations):
                     new_trust_score = cav.assess_trust(other_cav.name, user.name)
                     if new_trust_score is not None:
                         cav.trust_scores[other_cav.name] = new_trust_score
-                        log_data[cav.name]["trust_scores"][other_cav.name].append(new_trust_score)
+                        log_data[cav.name]["trust_scores"][other_cav.name].append(
+                            new_trust_score
+                        )
 
             # Log detected objects for each frame
             log_data[cav.name]["detected_objects"].append(
@@ -141,7 +177,7 @@ def run_experience(folder, user_configurations):
                     "frame": image_index,
                     "objects": cav.detected_objects,
                     "scene_label": labels,
-                    "confidence": confidences
+                    "confidence": confidences,
                 }
             )
 
@@ -164,15 +200,41 @@ def run_experience(folder, user_configurations):
 
 def main():
     counter = 0
-    
+
     # Generate all possible combinations of trust settings
-    for trust_level, requires_trust_history, trust_frames_required in product(trust_levels, requires_trust_history_options, trust_frames_required_options):
+    for trust_level, requires_trust_history, trust_frames_required in product(
+        trust_levels, requires_trust_history_options, trust_frames_required_options
+    ):
         # Define the user configurations with varying trust settings
         user_configurations = [
-            {'id': 1, 'name': 'User1', 'trust_level': trust_level, 'requires_trust_history': requires_trust_history, 'trust_frames_required': trust_frames_required},
-            {'id': 2, 'name': 'User2', 'trust_level': trust_level, 'requires_trust_history': requires_trust_history, 'trust_frames_required': trust_frames_required},
-            {'id': 3, 'name': 'User3', 'trust_level': trust_level, 'requires_trust_history': requires_trust_history, 'trust_frames_required': trust_frames_required},
-            {'id': 4, 'name': 'User4', 'trust_level': trust_level, 'requires_trust_history': requires_trust_history, 'trust_frames_required': trust_frames_required}
+            {
+                "id": 1,
+                "name": "User1",
+                "trust_level": trust_level,
+                "requires_trust_history": requires_trust_history,
+                "trust_frames_required": trust_frames_required,
+            },
+            {
+                "id": 2,
+                "name": "User2",
+                "trust_level": trust_level,
+                "requires_trust_history": requires_trust_history,
+                "trust_frames_required": trust_frames_required,
+            },
+            {
+                "id": 3,
+                "name": "User3",
+                "trust_level": trust_level,
+                "requires_trust_history": requires_trust_history,
+                "trust_frames_required": trust_frames_required,
+            },
+            {
+                "id": 4,
+                "name": "User4",
+                "trust_level": trust_level,
+                "requires_trust_history": requires_trust_history,
+                "trust_frames_required": trust_frames_required,
+            },
         ]
 
         # Run the experience for this configuration
@@ -180,12 +242,13 @@ def main():
         print(f"Running experience for: {folder_name}")
         run_experience(folder=folder_name, user_configurations=user_configurations)
         time.sleep(1)  # Pause between runs if necessary
-        
+
         counter += 1
-        
-        # # Can run all combination later
-        # if counter == 3:
-        #     break
+
+        # Can run all combination later
+        if counter == 2:
+            break
+
 
 if __name__ == "__main__":
     main()

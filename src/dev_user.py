@@ -1,11 +1,14 @@
 class User:
-    TRUST_LEVELS = {
-        'Cautious': 0.8,
-        'Moderate': 0.6,
-        'Trusting': 0.3
-    }
+    TRUST_LEVELS = {"Cautious": 0.8, "Moderate": 0.6, "Trusting": 0.3}
 
-    def __init__(self, user_id, name, trust_level='Moderate', requires_trust_history=False, trust_frames_required=10):
+    def __init__(
+        self,
+        user_id,
+        name,
+        trust_level="Moderate",
+        requires_trust_history=False,
+        trust_frames_required=10,
+    ):
         """
         Initialize a new user associated with CAV operations.
 
@@ -27,8 +30,10 @@ class User:
         self.requires_trust_history = requires_trust_history
         self.trust_frames_required = trust_frames_required
         self.trust_frames_tracker = {}
-        self.trust_overrides = {}  # Dictionary to store user's trust overrides by CAV id
-        self.trust_history = {}    # Dictionary to store history of trust values per CAV
+        self.trust_overrides = (
+            {}
+        )  # Dictionary to store user's trust overrides by CAV id
+        self.trust_history = {}  # Dictionary to store history of trust values per CAV
 
     def update_trust_frames_tracker(self, cav_id):
         """
@@ -74,7 +79,7 @@ class User:
         """
         if cav_id not in self.trust_overrides:
             self.trust_overrides[cav_id] = {}
-        self.trust_overrides[cav_id].update({'thresholds': thresholds})
+        self.trust_overrides[cav_id].update({"thresholds": thresholds})
 
     def update_trust_history(self, cav_id, trust_value):
         """
@@ -89,7 +94,10 @@ class User:
         self.trust_history[cav_id].append(trust_value)
 
         # Check if trust history meets the required frames for adjustment
-        if self.requires_trust_history and len(self.trust_history[cav_id]) >= self.trust_frames_required:
+        if (
+            self.requires_trust_history
+            and len(self.trust_history[cav_id]) >= self.trust_frames_required
+        ):
             # Process trust adjustment based on full history
             # This can be an averaging function or any other statistical analysis
             print(f"Processing trust adjustment for {cav_id} based on full history...")
