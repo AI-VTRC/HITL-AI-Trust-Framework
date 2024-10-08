@@ -3,7 +3,7 @@ import json
 import os
 
 # Path to the JSON file
-file_path = r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_5_HITL.json'
+file_path = r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\json\control\control_threshold_0.6_new.json'
 
 # Load JSON file
 with open(file_path, 'r') as file:
@@ -29,7 +29,7 @@ for cav_key, cav_values in data.items():
 df = pd.DataFrame(rows)
 
 # Saving DataFrame to a CSV file, maintaining the base file name
-os.chdir(r'C:\HITL-AI-Trust-Framework\Final_Simulations')
+os.chdir(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv')
 output_file = os.path.splitext(file_path)[0] + '.csv'
 df.to_csv(output_file, index=False)
 

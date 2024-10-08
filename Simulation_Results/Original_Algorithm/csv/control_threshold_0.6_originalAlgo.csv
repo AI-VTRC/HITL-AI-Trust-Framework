@@ -1,0 +1,13 @@
+CAV Reciever,CAV Sender,Image Frame Index,Trust Score
+cav1,trust_scores,0,cav2
+cav1,trust_scores,1,cav3
+cav1,trust_scores,2,cav4
+cav2,trust_scores,0,cav1
+cav2,trust_scores,1,cav3
+cav2,trust_scores,2,cav4
+cav3,trust_scores,0,cav1
+cav3,trust_scores,1,cav2
+cav3,trust_scores,2,cav4
+cav4,trust_scores,0,cav1
+cav4,trust_scores,1,cav2
+cav4,trust_scores,2,cav3

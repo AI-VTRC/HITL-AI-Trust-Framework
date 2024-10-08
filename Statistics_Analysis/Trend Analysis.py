@@ -3,22 +3,24 @@ import numpy as np
 import pymannkendall as mk
 from scipy.stats import ttest_ind
 from statsmodels.formula.api import ols
+import statsmodels.api as sm
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load all datasets
 datasets = {
-    'Sample_1': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_1_HITL.csv'),
-    'Sample_2': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_2_HITL.csv'),
-    'Sample_3': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_3_HITL.csv'),
-    'Sample_4': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_4_HITL.csv'),
-    'Sample_5': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample_5_HITL.csv'),
-    'Orig_1': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample1_threshold_0.6_originalAlgo.csv'),
-    'Orig_2': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample2_threshold_0.6_originalAlgo.csv'),
-    'Orig_3': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample3_threshold_0.6_originalAlgo.csv'),
-    'Orig_4': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample4_threshold_0.6_originalAlgo.csv'),
-    'Orig_5': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Final_Simulations\Sample5_threshold_0.6_originalAlgo.csv')
+    'Sample_1': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\HITL_Algorithm\csv\Sample_1_HITL.csv'),
+    'Sample_2': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\HITL_Algorithm\csv\Sample_2_HITL.csv'),
+    'Sample_3': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\HITL_Algorithm\csv\Sample_3_HITL.csv'),
+    'Sample_4': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\HITL_Algorithm\csv\Sample_4_HITL.csv'),
+    'Sample_5': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\HITL_Algorithm\csv\Sample_5_HITL.csv'),
+    'Orig_1': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv\Sample1_threshold_0.6_originalAlgo.csv'),
+    'Orig_2': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv\Sample2_threshold_0.6_originalAlgo.csv'),
+    'Orig_3': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv\Sample3_threshold_0.6_originalAlgo.csv'),
+    'Orig_4': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv\Sample4_threshold_0.6_originalAlgo.csv'),
+    'Orig_5': pd.read_csv(r'C:\HITL-AI-Trust-Framework\Simulation_Results\Original_Algorithm\csv\Sample5_threshold_0.6_originalAlgo.csv')
 }
 
 # Initialize an empty DataFrame to store results from all datasets with specified data types
@@ -52,10 +54,10 @@ for dataset_name, df in datasets.items():
     # Concatenate to the main results DataFrame
     all_results = pd.concat([all_results, temp_results], ignore_index=True)
 
-all_results.to_csv(r'C:\HITL-AI-Trust-Framework\Statistics Analysis\trend_calculation.csv', index=False)
+all_results.to_csv(r'C:\HITL-AI-Trust-Framework\Statistics_Analysis\trend_calculation.csv', index=False)
 
 # Load experiment parameters
-exp_design = pd.read_excel(r'C:\HITL-AI-Trust-Framework\Statistics Analysis\randomized_design_colors.xlsx')
+exp_design = pd.read_excel(r'C:\HITL-AI-Trust-Framework\Statistics_Analysis\randomized_design_colors.xlsx')
 
 # Mapping
 exp_design['Dataset'] = exp_design['Experiment (Dataset)'].map({1: 'Sample_1', 2: 'Sample_2', 3: 'Sample_3',
@@ -74,18 +76,30 @@ merged_df.loc[merged_df['Dataset'].isin(orig_datasets), 'User_Type'] = 'User_0.6
 merged_df.loc[merged_df['Dataset'].isin(orig_datasets), 'Trust History Required'] = False
 merged_df.loc[merged_df['Dataset'].isin(orig_datasets), 'Number of Trust Frames Required'] = 0
 
-merged_df['Exp'] = merged_df['Dataset'].apply(lambda x: 'Orig' if x in orig_datasets else 'New')
+merged_df['Exp'] = merged_df['Dataset'].apply(lambda x: 'Orig Trust Framework' if x in orig_datasets else 'PerceptiSync Framework')
 merged_df['Trust Monitor'] = merged_df['User_Type'].apply(lambda x: 'TRUE' if x == "User_M" else 'FALSE')
 
-merged_df.to_csv(r'C:\HITL-AI-Trust-Framework\Statistics Analysis\trend_statistics.csv', index=False)
+user_type_mapping = {
+    'User_0.3': 'Trusting',
+    'User_0.6': 'Moderate',
+    'User_0.8': 'Cautious',
+    'User_M': 'Dynamic'
+}
+
+# Replace the user type labels in the DataFrame
+merged_df['User_Type'] = merged_df['User_Type'].map(user_type_mapping)
+merged_df.to_csv(r'C:\HITL-AI-Trust-Framework\Statistics_Analysis\trend_statistics.csv', index=False)
 
 ###############################################
 ###############################################
 
-# Visualization of Tau by Exp
+# Create the boxplot
 plt.figure(figsize=(10, 6))
-sns.boxplot(x='Exp', y='Tau', data=merged_df)
-plt.title('Tau by Exp')
+plt.rcParams.update({'font.size': 16})  # Adjust this value as needed
+boxplot = sns.boxplot(x='Exp', y='Tau', data=merged_df)
+plt.title('Kendall Tau Coefficient by Framework')
+plt.xlabel('')
+plt.ylabel('Kendall Tau Coefficient')
 plt.show()
 
 def perform_one_tailed_ttest(df, column='Tau', group_column='Exp', alpha=0.05):
@@ -103,14 +117,16 @@ def perform_one_tailed_ttest(df, column='Tau', group_column='Exp', alpha=0.05):
     """
 
     # Filter the data into two groups based on the group_column
-    group_orig = df[df[group_column] == 'Orig'][column]
-    group_new = df[df[group_column] == 'New'][column]
+    group_orig = df[df[group_column] == 'Orig Trust Framework'][column]
+    group_new = df[df[group_column] == 'PerceptiSync Framework'][column]
 
     # Calculate means and standard deviations
     mean_orig = group_orig.mean()
     std_orig = group_orig.std()
+    median_orig = group_orig.median()
     mean_new = group_new.mean()
     std_new = group_new.std()
+    median_new = group_new.median()
 
     # Perform the two-sample t-test (Welch's t-test for unequal variances)
     t_stat, p_value = ttest_ind(group_new, group_orig, equal_var=False)
@@ -125,6 +141,7 @@ def perform_one_tailed_ttest(df, column='Tau', group_column='Exp', alpha=0.05):
     print("One-tailed t-test (testing if New > Orig):")
     print(f"Group 'Orig' mean: {mean_orig:.3f}, std deviation: {std_orig:.3f}")
     print(f"Group 'New' mean: {mean_new:.3f}, std deviation: {std_new:.3f}")
+    print(f"Group 'New' median: {median_new:.3f}, Group 'Old' median: {median_orig:.3f}")
     print(f"T-statistic: {t_stat:.3f}")
     print(f"One-tailed p-value: {p_value_one_tailed:.3g}")
 
@@ -137,31 +154,31 @@ def perform_one_tailed_ttest(df, column='Tau', group_column='Exp', alpha=0.05):
 
 perform_one_tailed_ttest(merged_df)
 
+new_df = merged_df[merged_df['Exp'] == 'PerceptiSync Framework']
+
 # Visualization of Tau by User_Type
 plt.figure(figsize=(10, 6))
-sns.boxplot(x='User_Type', y='Tau', data=merged_df)
-plt.title('Tau by User_Type')
+plt.rcParams.update({'font.size': 16})  # Adjust this value as needed
+sns.boxplot(x='User_Type', y='Tau', data=new_df)
+plt.title('Kendall Tau Coefficient by Trust Levels')
+plt.ylabel('Kendall Tau Coefficient')
+plt.xlabel('')
 plt.show()
 
-# Filter out 'User_M'
-merge_wo_M = merged_df[merged_df['User_Type'] != 'User_M']
-
-# Visualization of Tau by Exp
-plt.figure(figsize=(10, 6))
-sns.boxplot(x='Exp', y='Tau', data=merge_wo_M)
-plt.title('Tau by Exp')
-plt.show()
-
-perform_one_tailed_ttest(merge_wo_M)
 
 # Visualization of Tau by Trust History Required
 plt.figure(figsize=(10, 6))
-sns.boxplot(x='Trust History Required', y='Tau', data=merged_df)
+sns.boxplot(x='Trust History Required', y='Tau', data=new_df)
 plt.title('Tau by Trust History Required')
 plt.show()
 
-# Regression for Number of Trust Frames Required
-model_trust_frames = ols('Tau ~ Q("Number of Trust Frames Required")', data=merged_df).fit()
-print("\nRegression results for Number of Trust Frames Required:")
-print(model_trust_frames.summary())
+model = ols('Tau ~ C(User_Type) + C(Q("Trust History Required")) + C(Q("Number of Trust Frames Required")) + C(Dataset)', data=new_df).fit()
+anova_results = sm.stats.anova_lm(model, typ=2)
+print(anova_results)
 
+tukey = pairwise_tukeyhsd(endog=new_df['Tau'],     # Data
+                          groups=new_df['User_Type'],   # Groups
+                          alpha=0.05)          # Significance level
+
+# Print the results
+print(tukey.summary())

@@ -29,7 +29,7 @@ def run_experience(folder, trust_threshold):
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
 
-    root_connection = "assets/data/" + folder
+    root_connection = "C:\\HITL-AI-Trust-Framework\\data\\" + folder
     num_cars = 4
 
     # Assumes the number of images for each Car is the same
@@ -180,7 +180,8 @@ def main():
     trust_thresholds = [0.6]  # 0.3, 0.5, 0.8
     for trust_threshold in trust_thresholds:
         for i in range(5, 6):
-            run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
+            run_experience(folder="control", trust_threshold=trust_threshold)
+            #run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
             # break
             time.sleep(10)
 

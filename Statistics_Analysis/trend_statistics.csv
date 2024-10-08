@@ -1,121 +1,121 @@
 Dataset,CAV Receiver,CAV Sender,Tau,User_Type,Trust History Required,Number of Trust Frames Required,Exp,Trust Monitor
-Sample_1,cav1,cav2,0.05228758169934641,User_M,False,10.0,New,TRUE
-Sample_1,cav1,cav3,0.1830065359477124,User_M,False,10.0,New,TRUE
-Sample_1,cav1,cav4,0.6143790849673203,User_M,False,10.0,New,TRUE
-Sample_1,cav2,cav1,0.10457516339869281,User_0.3,False,7.0,New,FALSE
-Sample_1,cav2,cav3,0.2679738562091503,User_0.3,False,7.0,New,FALSE
-Sample_1,cav2,cav4,-0.28104575163398693,User_0.3,False,7.0,New,FALSE
-Sample_1,cav3,cav1,0.0915032679738562,User_0.6,False,8.0,New,FALSE
-Sample_1,cav3,cav2,0.3137254901960784,User_0.6,False,8.0,New,FALSE
-Sample_1,cav3,cav4,0.16993464052287582,User_0.6,False,8.0,New,FALSE
-Sample_1,cav4,cav1,0.11764705882352941,User_0.8,False,4.0,New,FALSE
-Sample_1,cav4,cav2,0.24836601307189543,User_0.8,False,4.0,New,FALSE
-Sample_1,cav4,cav3,-0.2222222222222222,User_0.8,False,4.0,New,FALSE
-Sample_2,cav1,cav2,0.5402298850574713,User_M,False,0.0,New,TRUE
-Sample_2,cav1,cav3,0.47126436781609193,User_M,False,0.0,New,TRUE
-Sample_2,cav1,cav4,0.4850574712643678,User_M,False,0.0,New,TRUE
-Sample_2,cav2,cav1,0.07126436781609195,User_0.3,False,3.0,New,FALSE
-Sample_2,cav2,cav3,0.1425287356321839,User_0.3,False,3.0,New,FALSE
-Sample_2,cav2,cav4,0.08045977011494253,User_0.3,False,3.0,New,FALSE
-Sample_2,cav3,cav1,0.39080459770114945,User_0.6,True,7.0,New,FALSE
-Sample_2,cav3,cav2,0.3471264367816092,User_0.6,True,7.0,New,FALSE
-Sample_2,cav3,cav4,0.4045977011494253,User_0.6,True,7.0,New,FALSE
-Sample_2,cav4,cav1,0.1425287356321839,User_0.8,True,6.0,New,FALSE
-Sample_2,cav4,cav2,-0.013793103448275862,User_0.8,True,6.0,New,FALSE
-Sample_2,cav4,cav3,0.1310344827586207,User_0.8,True,6.0,New,FALSE
-Sample_3,cav1,cav2,0.5049261083743842,User_M,True,10.0,New,TRUE
-Sample_3,cav1,cav3,0.5024630541871922,User_M,True,10.0,New,TRUE
-Sample_3,cav1,cav4,0.6551724137931034,User_M,True,10.0,New,TRUE
-Sample_3,cav2,cav1,0.30049261083743845,User_0.3,True,6.0,New,FALSE
-Sample_3,cav2,cav3,0.2733990147783251,User_0.3,True,6.0,New,FALSE
-Sample_3,cav2,cav4,0.4187192118226601,User_0.3,True,6.0,New,FALSE
-Sample_3,cav3,cav1,0.3645320197044335,User_0.6,True,2.0,New,FALSE
-Sample_3,cav3,cav2,0.29310344827586204,User_0.6,True,2.0,New,FALSE
-Sample_3,cav3,cav4,0.29064039408866993,User_0.6,True,2.0,New,FALSE
-Sample_3,cav4,cav1,0.0960591133004926,User_0.8,False,10.0,New,FALSE
-Sample_3,cav4,cav2,-0.20935960591133004,User_0.8,False,10.0,New,FALSE
-Sample_3,cav4,cav3,0.019704433497536946,User_0.8,False,10.0,New,FALSE
-Sample_4,cav1,cav2,0.31827956989247314,User_M,False,9.0,New,TRUE
-Sample_4,cav1,cav3,0.6709677419354839,User_M,False,9.0,New,TRUE
-Sample_4,cav1,cav4,0.221505376344086,User_M,False,9.0,New,TRUE
-Sample_4,cav2,cav1,0.16344086021505377,User_0.3,True,3.0,New,FALSE
-Sample_4,cav2,cav3,0.20430107526881722,User_0.3,True,3.0,New,FALSE
-Sample_4,cav2,cav4,0.12043010752688173,User_0.3,True,3.0,New,FALSE
-Sample_4,cav3,cav1,0.4150537634408602,User_0.6,False,9.0,New,FALSE
-Sample_4,cav3,cav2,0.41935483870967744,User_0.6,False,9.0,New,FALSE
-Sample_4,cav3,cav4,0.3849462365591398,User_0.6,False,9.0,New,FALSE
-Sample_4,cav4,cav1,-0.004301075268817204,User_0.8,True,2.0,New,FALSE
-Sample_4,cav4,cav2,0.047311827956989246,User_0.8,True,2.0,New,FALSE
-Sample_4,cav4,cav3,0.14193548387096774,User_0.8,True,2.0,New,FALSE
-Sample_5,cav1,cav2,0.4075079149706015,User_M,True,5.0,New,TRUE
-Sample_5,cav1,cav3,0.47218453188602444,User_M,True,5.0,New,TRUE
-Sample_5,cav1,cav4,0.352329262777024,User_M,True,5.0,New,TRUE
-Sample_5,cav2,cav1,0.1650836725463591,User_0.3,True,8.0,New,FALSE
-Sample_5,cav2,cav3,0.25237449118046135,User_0.3,True,8.0,New,FALSE
-Sample_5,cav2,cav4,0.20488466757123475,User_0.3,True,8.0,New,FALSE
-Sample_5,cav3,cav1,0.09633649932157395,User_0.6,False,6.0,New,FALSE
-Sample_5,cav3,cav2,0.02125734961555857,User_0.6,False,6.0,New,FALSE
-Sample_5,cav3,cav4,-0.04568068747173225,User_0.6,False,6.0,New,FALSE
-Sample_5,cav4,cav1,0.09724106739032112,User_0.8,True,8.0,New,FALSE
-Sample_5,cav4,cav2,0.005879692446856626,User_0.8,True,8.0,New,FALSE
-Sample_5,cav4,cav3,0.18588873812754408,User_0.8,True,8.0,New,FALSE
-Orig_1,cav1,cav2,0.3161764705882353,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav1,cav3,0.11029411764705882,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav1,cav4,0.04411764705882353,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav2,cav1,0.1323529411764706,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav2,cav3,0.10294117647058823,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav2,cav4,0.09558823529411764,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav3,cav1,0.022058823529411766,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav3,cav2,-0.11764705882352941,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav3,cav4,-0.13970588235294118,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav4,cav1,0.007352941176470588,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav4,cav2,0.0661764705882353,User_0.6,False,0.0,Orig,FALSE
-Orig_1,cav4,cav3,0.007352941176470588,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav1,cav2,0.2832512315270936,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav1,cav3,0.11576354679802955,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav1,cav4,0.12807881773399016,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav2,cav1,0.05665024630541872,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav2,cav3,0.09113300492610837,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav2,cav4,-0.11576354679802955,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav3,cav1,-0.04926108374384237,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav3,cav2,0.14285714285714285,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav3,cav4,0.07142857142857142,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav4,cav1,0.10591133004926108,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav4,cav2,0.2832512315270936,User_0.6,False,0.0,Orig,FALSE
-Orig_2,cav4,cav3,0.2019704433497537,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav1,cav2,-0.015873015873015872,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav1,cav3,0.031746031746031744,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav1,cav4,-0.07671957671957672,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav2,cav1,-0.018518518518518517,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav2,cav3,0.13227513227513227,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav2,cav4,-0.1349206349206349,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav3,cav1,0.16666666666666666,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav3,cav2,0.06084656084656084,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav3,cav4,-0.23544973544973544,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav4,cav1,-0.015873015873015872,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav4,cav2,0.10846560846560846,User_0.6,False,0.0,Orig,FALSE
-Orig_3,cav4,cav3,0.037037037037037035,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav1,cav2,0.08735632183908046,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav1,cav3,-0.07816091954022988,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav1,cav4,0.11494252873563218,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav2,cav1,0.07586206896551724,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav2,cav3,0.022988505747126436,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav2,cav4,-0.022988505747126436,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav3,cav1,0.06436781609195402,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav3,cav2,-0.0896551724137931,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav3,cav4,0.034482758620689655,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav4,cav1,0.1724137931034483,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav4,cav2,0.006896551724137931,User_0.6,False,0.0,Orig,FALSE
-Orig_4,cav4,cav3,0.1310344827586207,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav1,cav2,0.06153846153846154,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav1,cav3,0.0009324009324009324,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav1,cav4,0.05874125874125874,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav2,cav1,-0.014452214452214453,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav2,cav3,0.009324009324009324,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav2,cav4,-0.031235431235431235,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav3,cav1,0.08484848484848485,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav3,cav2,0.11794871794871795,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav3,cav4,0.04895104895104895,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav4,cav1,0.11421911421911422,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav4,cav2,0.013986013986013986,User_0.6,False,0.0,Orig,FALSE
-Orig_5,cav4,cav3,0.05174825174825175,User_0.6,False,0.0,Orig,FALSE
+Sample_1,cav1,cav2,0.05228758169934641,Dynamic,False,10.0,PerceptiSync Framework,TRUE
+Sample_1,cav1,cav3,0.1830065359477124,Dynamic,False,10.0,PerceptiSync Framework,TRUE
+Sample_1,cav1,cav4,0.6143790849673203,Dynamic,False,10.0,PerceptiSync Framework,TRUE
+Sample_1,cav2,cav1,0.10457516339869281,Trusting,False,7.0,PerceptiSync Framework,FALSE
+Sample_1,cav2,cav3,0.2679738562091503,Trusting,False,7.0,PerceptiSync Framework,FALSE
+Sample_1,cav2,cav4,-0.28104575163398693,Trusting,False,7.0,PerceptiSync Framework,FALSE
+Sample_1,cav3,cav1,0.0915032679738562,Moderate,False,8.0,PerceptiSync Framework,FALSE
+Sample_1,cav3,cav2,0.3137254901960784,Moderate,False,8.0,PerceptiSync Framework,FALSE
+Sample_1,cav3,cav4,0.16993464052287582,Moderate,False,8.0,PerceptiSync Framework,FALSE
+Sample_1,cav4,cav1,0.11764705882352941,Cautious,False,4.0,PerceptiSync Framework,FALSE
+Sample_1,cav4,cav2,0.24836601307189543,Cautious,False,4.0,PerceptiSync Framework,FALSE
+Sample_1,cav4,cav3,-0.2222222222222222,Cautious,False,4.0,PerceptiSync Framework,FALSE
+Sample_2,cav1,cav2,0.5402298850574713,Dynamic,False,0.0,PerceptiSync Framework,TRUE
+Sample_2,cav1,cav3,0.47126436781609193,Dynamic,False,0.0,PerceptiSync Framework,TRUE
+Sample_2,cav1,cav4,0.4850574712643678,Dynamic,False,0.0,PerceptiSync Framework,TRUE
+Sample_2,cav2,cav1,0.07126436781609195,Trusting,False,3.0,PerceptiSync Framework,FALSE
+Sample_2,cav2,cav3,0.1425287356321839,Trusting,False,3.0,PerceptiSync Framework,FALSE
+Sample_2,cav2,cav4,0.08045977011494253,Trusting,False,3.0,PerceptiSync Framework,FALSE
+Sample_2,cav3,cav1,0.39080459770114945,Moderate,True,7.0,PerceptiSync Framework,FALSE
+Sample_2,cav3,cav2,0.3471264367816092,Moderate,True,7.0,PerceptiSync Framework,FALSE
+Sample_2,cav3,cav4,0.4045977011494253,Moderate,True,7.0,PerceptiSync Framework,FALSE
+Sample_2,cav4,cav1,0.1425287356321839,Cautious,True,6.0,PerceptiSync Framework,FALSE
+Sample_2,cav4,cav2,-0.013793103448275862,Cautious,True,6.0,PerceptiSync Framework,FALSE
+Sample_2,cav4,cav3,0.1310344827586207,Cautious,True,6.0,PerceptiSync Framework,FALSE
+Sample_3,cav1,cav2,0.5049261083743842,Dynamic,True,10.0,PerceptiSync Framework,TRUE
+Sample_3,cav1,cav3,0.5024630541871922,Dynamic,True,10.0,PerceptiSync Framework,TRUE
+Sample_3,cav1,cav4,0.6551724137931034,Dynamic,True,10.0,PerceptiSync Framework,TRUE
+Sample_3,cav2,cav1,0.30049261083743845,Trusting,True,6.0,PerceptiSync Framework,FALSE
+Sample_3,cav2,cav3,0.2733990147783251,Trusting,True,6.0,PerceptiSync Framework,FALSE
+Sample_3,cav2,cav4,0.4187192118226601,Trusting,True,6.0,PerceptiSync Framework,FALSE
+Sample_3,cav3,cav1,0.3645320197044335,Moderate,True,2.0,PerceptiSync Framework,FALSE
+Sample_3,cav3,cav2,0.29310344827586204,Moderate,True,2.0,PerceptiSync Framework,FALSE
+Sample_3,cav3,cav4,0.29064039408866993,Moderate,True,2.0,PerceptiSync Framework,FALSE
+Sample_3,cav4,cav1,0.0960591133004926,Cautious,False,10.0,PerceptiSync Framework,FALSE
+Sample_3,cav4,cav2,-0.20935960591133004,Cautious,False,10.0,PerceptiSync Framework,FALSE
+Sample_3,cav4,cav3,0.019704433497536946,Cautious,False,10.0,PerceptiSync Framework,FALSE
+Sample_4,cav1,cav2,0.31827956989247314,Dynamic,False,9.0,PerceptiSync Framework,TRUE
+Sample_4,cav1,cav3,0.6709677419354839,Dynamic,False,9.0,PerceptiSync Framework,TRUE
+Sample_4,cav1,cav4,0.221505376344086,Dynamic,False,9.0,PerceptiSync Framework,TRUE
+Sample_4,cav2,cav1,0.16344086021505377,Trusting,True,3.0,PerceptiSync Framework,FALSE
+Sample_4,cav2,cav3,0.20430107526881722,Trusting,True,3.0,PerceptiSync Framework,FALSE
+Sample_4,cav2,cav4,0.12043010752688173,Trusting,True,3.0,PerceptiSync Framework,FALSE
+Sample_4,cav3,cav1,0.4150537634408602,Moderate,False,9.0,PerceptiSync Framework,FALSE
+Sample_4,cav3,cav2,0.41935483870967744,Moderate,False,9.0,PerceptiSync Framework,FALSE
+Sample_4,cav3,cav4,0.3849462365591398,Moderate,False,9.0,PerceptiSync Framework,FALSE
+Sample_4,cav4,cav1,-0.004301075268817204,Cautious,True,2.0,PerceptiSync Framework,FALSE
+Sample_4,cav4,cav2,0.047311827956989246,Cautious,True,2.0,PerceptiSync Framework,FALSE
+Sample_4,cav4,cav3,0.14193548387096774,Cautious,True,2.0,PerceptiSync Framework,FALSE
+Sample_5,cav1,cav2,0.4075079149706015,Dynamic,True,5.0,PerceptiSync Framework,TRUE
+Sample_5,cav1,cav3,0.47218453188602444,Dynamic,True,5.0,PerceptiSync Framework,TRUE
+Sample_5,cav1,cav4,0.352329262777024,Dynamic,True,5.0,PerceptiSync Framework,TRUE
+Sample_5,cav2,cav1,0.1650836725463591,Trusting,True,8.0,PerceptiSync Framework,FALSE
+Sample_5,cav2,cav3,0.25237449118046135,Trusting,True,8.0,PerceptiSync Framework,FALSE
+Sample_5,cav2,cav4,0.20488466757123475,Trusting,True,8.0,PerceptiSync Framework,FALSE
+Sample_5,cav3,cav1,0.09633649932157395,Moderate,False,6.0,PerceptiSync Framework,FALSE
+Sample_5,cav3,cav2,0.02125734961555857,Moderate,False,6.0,PerceptiSync Framework,FALSE
+Sample_5,cav3,cav4,-0.04568068747173225,Moderate,False,6.0,PerceptiSync Framework,FALSE
+Sample_5,cav4,cav1,0.09724106739032112,Cautious,True,8.0,PerceptiSync Framework,FALSE
+Sample_5,cav4,cav2,0.005879692446856626,Cautious,True,8.0,PerceptiSync Framework,FALSE
+Sample_5,cav4,cav3,0.18588873812754408,Cautious,True,8.0,PerceptiSync Framework,FALSE
+Orig_1,cav1,cav2,0.3161764705882353,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav1,cav3,0.11029411764705882,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav1,cav4,0.04411764705882353,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav2,cav1,0.1323529411764706,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav2,cav3,0.10294117647058823,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav2,cav4,0.09558823529411764,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav3,cav1,0.022058823529411766,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav3,cav2,-0.11764705882352941,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav3,cav4,-0.13970588235294118,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav4,cav1,0.007352941176470588,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav4,cav2,0.0661764705882353,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_1,cav4,cav3,0.007352941176470588,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav1,cav2,0.2832512315270936,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav1,cav3,0.11576354679802955,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav1,cav4,0.12807881773399016,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav2,cav1,0.05665024630541872,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav2,cav3,0.09113300492610837,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav2,cav4,-0.11576354679802955,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav3,cav1,-0.04926108374384237,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav3,cav2,0.14285714285714285,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav3,cav4,0.07142857142857142,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav4,cav1,0.10591133004926108,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav4,cav2,0.2832512315270936,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_2,cav4,cav3,0.2019704433497537,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav1,cav2,-0.015873015873015872,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav1,cav3,0.031746031746031744,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav1,cav4,-0.07671957671957672,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav2,cav1,-0.018518518518518517,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav2,cav3,0.13227513227513227,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav2,cav4,-0.1349206349206349,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav3,cav1,0.16666666666666666,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav3,cav2,0.06084656084656084,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav3,cav4,-0.23544973544973544,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav4,cav1,-0.015873015873015872,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav4,cav2,0.10846560846560846,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_3,cav4,cav3,0.037037037037037035,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav1,cav2,0.08735632183908046,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav1,cav3,-0.07816091954022988,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav1,cav4,0.11494252873563218,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav2,cav1,0.07586206896551724,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav2,cav3,0.022988505747126436,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav2,cav4,-0.022988505747126436,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav3,cav1,0.06436781609195402,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav3,cav2,-0.0896551724137931,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav3,cav4,0.034482758620689655,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav4,cav1,0.1724137931034483,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav4,cav2,0.006896551724137931,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_4,cav4,cav3,0.1310344827586207,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav1,cav2,0.06153846153846154,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav1,cav3,0.0009324009324009324,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav1,cav4,0.05874125874125874,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav2,cav1,-0.014452214452214453,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav2,cav3,0.009324009324009324,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav2,cav4,-0.031235431235431235,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav3,cav1,0.08484848484848485,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav3,cav2,0.11794871794871795,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav3,cav4,0.04895104895104895,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav4,cav1,0.11421911421911422,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav4,cav2,0.013986013986013986,Moderate,False,0.0,Orig Trust Framework,FALSE
+Orig_5,cav4,cav3,0.05174825174825175,Moderate,False,0.0,Orig Trust Framework,FALSE
