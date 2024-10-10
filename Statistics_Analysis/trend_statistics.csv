@@ -1,4 +1,16 @@
 Dataset,CAV Receiver,CAV Sender,Tau,User_Type,Trust History Required,Number of Trust Frames Required,Exp,Trust Monitor
+Control,cav1,cav2,0.16666666666666666,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav1,cav3,-0.3333333333333333,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav1,cav4,-0.1111111111111111,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav2,cav1,0.3611111111111111,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav2,cav3,0.4166666666666667,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav2,cav4,0.2222222222222222,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav3,cav1,0.25,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav3,cav2,0.2222222222222222,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav3,cav4,-0.2222222222222222,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav4,cav1,-0.3055555555555556,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav4,cav2,-0.08333333333333333,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
+Control,cav4,cav3,-0.16666666666666666,Moderate,False,0.0,Orig TF on Control Datasets,FALSE
 Sample_1,cav1,cav2,0.05228758169934641,Dynamic,False,10.0,PerceptiSync Framework,TRUE
 Sample_1,cav1,cav3,0.1830065359477124,Dynamic,False,10.0,PerceptiSync Framework,TRUE
 Sample_1,cav1,cav4,0.6143790849673203,Dynamic,False,10.0,PerceptiSync Framework,TRUE
