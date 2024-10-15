@@ -14,12 +14,12 @@ rows = []
 
 # Loop through each key in the JSON and flatten the structure
 for cav_key, cav_values in data.items():
-    for target_key, scores in cav_values.items():
-        for index, score in enumerate(scores):
+    for trust_category, cav_trust_scores in cav_values['trust_scores'].items():
+        for index, score in enumerate(cav_trust_scores):
             # Creating a row for each score
             row = {
-                'CAV Reciever': cav_key,
-                'CAV Sender': target_key,
+                'CAV Receiver': cav_key,
+                'CAV Sender': trust_category,
                 'Image Frame Index': index,
                 'Trust Score': score
             }

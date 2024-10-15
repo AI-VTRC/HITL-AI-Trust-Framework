@@ -9,17 +9,20 @@ import os
 base_path = 'json'
 folders = sorted([f for f in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, f))])
 
+
 def get_json_files(folder):
     """Function to get json files from a selected folder"""
     folder_path = os.path.join(base_path, folder)
     json_files = [f for f in os.listdir(folder_path) if f.endswith('.json')]
     return json_files
 
+
 def load_json_data(folder, json_file):
     """Function to load JSON data based on selected file path"""
     file_path = os.path.join(base_path, folder, json_file)
     with open(file_path) as f:
         return json.load(f)
+
 
 def generate_traces_for_range(cav_data, selected_index):
     """Function to generate Plotly traces for a range of data points"""
@@ -28,11 +31,12 @@ def generate_traces_for_range(cav_data, selected_index):
         for target_cav, values in connections.items():
             traces.append(go.Scatter(
                 x=list(range(1, selected_index + 2)),
-                y=values[:selected_index + 1], 
+                y=values[:selected_index + 1],
                 mode='lines',
                 name=f'{cav} -> {target_cav}'
             ))
     return traces
+
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -73,6 +77,7 @@ app.layout = html.Div([
     ),
 ])
 
+
 # Callback to update the json file dropdown based on the selected folder
 @app.callback(
     Output('json-dropdown', 'options'),
@@ -83,6 +88,7 @@ def update_json_dropdown(selected_folder):
         return []
     json_files = get_json_files(selected_folder)
     return [{'label': json_file, 'value': json_file} for json_file in json_files]
+
 
 # Callback to load the data and update the graph and slider
 @app.callback(
@@ -107,7 +113,7 @@ def update_graph(selected_folder, selected_json, selected_index):
     max_data_points = max(len(values) for connections in data.values() for values in connections.values())
 
     # Generate slider marks dynamically
-    marks = {i: f'{i+1}' for i in range(max_data_points)}
+    marks = {i: f'{i + 1}' for i in range(max_data_points)}
 
     return {
         'data': traces,
@@ -119,6 +125,7 @@ def update_graph(selected_folder, selected_json, selected_index):
             hovermode='closest'
         )
     }, max_data_points - 1, marks
+
 
 # Callback to reset the dropdowns and slider when the reset button is clicked
 @app.callback(
@@ -135,6 +142,7 @@ def reset_fields(n_clicks, folder_value, json_value, slider_value):
         # Reset all fields to None or initial values
         return None, None, 0
     return folder_value, json_value, slider_value
+
 
 # Run the app
 if __name__ == '__main__':
