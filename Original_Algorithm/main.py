@@ -24,7 +24,7 @@ def run_experience(folder, trust_threshold):
     model_classification.eval()
 
     # Load the pre-trained object detection model
-    model_object_detection = YOLO("yolov8n.pt")
+    model_object_detection = YOLO("yolov8l.pt")
 
     # Define the trust propagation and trust fusion data structures
     trust_recommendations = {}
@@ -179,9 +179,9 @@ def run_experience(folder, trust_threshold):
 def main():
     trust_thresholds = [0.6]  # 0.3, 0.5, 0.8
     for trust_threshold in trust_thresholds:
-        for i in range(5, 6):
-            run_experience(folder="control", trust_threshold=trust_threshold)
-            #run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
+        for i in range(2, 3):
+            #run_experience(folder="control", trust_threshold=trust_threshold)
+            run_experience(folder="Sample" + str(i), trust_threshold=trust_threshold)
             # break
             time.sleep(10)
 

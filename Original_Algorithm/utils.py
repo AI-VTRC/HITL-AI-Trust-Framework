@@ -80,6 +80,7 @@ def classify_image(image_path, model_classification):
 
     return first_key, first_value
 
+
 def detect_objects(image_path, model_object_detection):
     """
     Perform object detection on an image using a pre-defined object detection model (e.g., YOLO).
@@ -139,7 +140,7 @@ def tuple_to_dict(trust_tuples, cav_names, obj_index):
     obj_dict = {}
 
     # Get other objects except the current one
-    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1 :]
+    other_objects = cav_names[:obj_index] + cav_names[obj_index + 1:]
 
     for idx, other_obj in enumerate(other_objects):
         obj_dict[other_obj] = trust_tuples[obj_index][idx]
