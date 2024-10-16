@@ -5,7 +5,7 @@ import json
 from PIL import Image
 
 # Set the page to wide mode (full screen)
-st.set_page_config(layout="wide", page_title="CAV Interaction Visualization")
+st.set_page_config(layout="wide", page_title="CAVs Interaction Visualization")
 
 # Define the base directories
 base_dirs = {
@@ -48,22 +48,27 @@ def generate_traces_for_range(cav_data, selected_index):
     traces = []
     for cav, connections in cav_data.items():
         for target_cav, values in connections.items():
-            # Ensure values is a list or a sliceable object
             if isinstance(values, (list, tuple)):
-                # Slice only if values is sliceable
+                # Slice the values for the selected index range
+                x_values = list(range(1, selected_index + 2))
+                y_values = values[: selected_index + 1]
+
+                # Create the trace with text displaying the y-values
                 traces.append(
                     go.Scatter(
-                        x=list(range(1, selected_index + 2)),
-                        y=values[: selected_index + 1],  # Perform slicing safely
-                        mode="lines",
+                        x=x_values,
+                        y=y_values,
+                        mode="lines+markers+text",  # Add text mode to display values
+                        text=[
+                            f"{y:.2f}" for y in y_values
+                        ],  # Format the values to show
+                        textposition="top center",  # Position the text above the markers
+                        textfont=dict(color="black"),  # Set text color to black
                         name=f"{cav} -> {target_cav}",
                     )
                 )
             else:
-                # Handle the case where values is not sliceable (raise a warning or log)
-                st.warning(
-                    f"Unexpected data format for {cav} -> {target_cav}. Please check your JSON format."
-                )
+                st.warning(f"Unexpected data format for {cav} -> {target_cav}")
     return traces
 
 
@@ -82,7 +87,7 @@ def get_image_paths(sample_folder, frame_number):
 
 # Center the title using custom HTML and CSS
 st.markdown(
-    "<h1 style='text-align: center;'>CAV Interaction Visualization</h1>",
+    "<h1 style='text-align: center;'>CAVs Interaction Visualization</h1>",
     unsafe_allow_html=True,
 )
 
@@ -117,9 +122,20 @@ if algorithm:
             traces = generate_traces_for_range(data, selected_index)
             fig = go.Figure(traces)
             fig.update_layout(
-                title=f"CAV Interaction Data (Showing Data Points: 1 to {selected_index + 1})",
-                xaxis={"title": "Data Point Index"},
-                yaxis={"title": "Value"},
+                title=dict(
+                    text=f"CAV Interaction Data (Showing Data Points: 1 to {selected_index + 1})",
+                    font=dict(color="black"),
+                ),
+                xaxis=dict(
+                    title="Data Point Index",
+                    tickfont=dict(color="black"),
+                    titlefont=dict(color="black"),
+                ),
+                yaxis=dict(
+                    title="Value",
+                    tickfont=dict(color="black"),
+                    titlefont=dict(color="black"),
+                ),
                 hovermode="closest",
                 template="plotly_white",  # Use light theme for Plotly charts
             )
@@ -132,11 +148,15 @@ if algorithm:
                 car_image = images.get(f"Car{i+1}")
                 if car_image and os.path.exists(car_image):
                     with cols[i]:
-                        st.image(
-                            Image.open(car_image),
-                            caption=f"Car {i+1}",
-                            use_column_width=True,
+                        st.image(Image.open(car_image), use_column_width=True)
+                        st.markdown(
+                            f"<p style='text-align:center; color:black;'>CAV{i+1} FOV</p>",
+                            unsafe_allow_html=True,
                         )
                 else:
                     with cols[i]:
-                        st.write(f"Car {i+1} image not found")
+                        # Display the message in black using markdown
+                        st.markdown(
+                            f"<p style='text-align:center; color:black;'>Car {i+1} image not found</p>",
+                            unsafe_allow_html=True,
+                        )
