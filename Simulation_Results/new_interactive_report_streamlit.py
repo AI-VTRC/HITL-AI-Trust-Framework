@@ -118,8 +118,8 @@ if algorithm:
             fig = go.Figure(traces)
             fig.update_layout(
                 title=f"CAV Interaction Data (Showing Data Points: 1 to {selected_index + 1})",
-                xaxis={"title": "Data Point Index"},
-                yaxis={"title": "Value"},
+                xaxis={"title": "Time Frame Index"},
+                yaxis={"title": "Trust Score"},
                 hovermode="closest",
                 template="plotly_white",  # Use light theme for Plotly charts
             )
@@ -134,7 +134,7 @@ if algorithm:
                     with cols[i]:
                         st.image(
                             Image.open(car_image),
-                            caption=f"Car {i+1}",
+                            caption=f"CAV{i+1} FOV",
                             use_column_width=True,
                         )
                 else:
