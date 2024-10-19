@@ -129,12 +129,12 @@ if algorithm:
                 xaxis=dict(
                     title="Time Frame Index",
                     tickfont=dict(color="black"),
-                    titlefont=dict(color="black"),
+                    titlefont=dict(color="black", size=14, family="Arial Black"),
                 ),
                 yaxis=dict(
                     title="Trust Value",
                     tickfont=dict(color="black"),
-                    titlefont=dict(color="black"),
+                    titlefont=dict(color="black", size=14, family="Arial Black"),
                 ),
                 hovermode="closest",
                 template="plotly_white",  # Use light theme for Plotly charts
@@ -150,7 +150,7 @@ if algorithm:
                     with cols[i]:
                         st.image(Image.open(car_image), use_column_width=True)
                         st.markdown(
-                            f"<p style='text-align:center; color:black;'>CAV{i+1} FOV</p>",
+                            f"<h3 style='text-align:center; color:black;'>CAV{i+1} FOV</h3>",
                             unsafe_allow_html=True,
                         )
                 else:
