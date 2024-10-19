@@ -127,12 +127,12 @@ if algorithm:
                     font=dict(color="black"),
                 ),
                 xaxis=dict(
-                    title="Data Point Index",
+                    title="Time Frame Index",
                     tickfont=dict(color="black"),
                     titlefont=dict(color="black"),
                 ),
                 yaxis=dict(
-                    title="Value",
+                    title="Trust Value",
                     tickfont=dict(color="black"),
                     titlefont=dict(color="black"),
                 ),
