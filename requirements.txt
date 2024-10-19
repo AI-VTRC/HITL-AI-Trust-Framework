@@ -11,3 +11,4 @@ openpyxl
 plotly
 dash
 dash-bootstrap-components
+streamlit==1.38.0
