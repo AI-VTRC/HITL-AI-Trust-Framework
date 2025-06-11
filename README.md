@@ -123,7 +123,7 @@ All data, parameters, and code dependencies are included for transparency and re
 If you use this framework in your work, please cite our paper:
 
 PerceptiSync: Trustworthy Object Detection using Crowds-in-the-Loop for Cyber-Physical Systems (2025)
-
+```
 @article{perceptisync2026,
   author    = {Matthew Wilchek and Minh Nguyen and Yingjie Wang and Kurt Luther and Feras A. Batarseh},
   title     = {PerceptiSync: Trustworthy Object Detection using Crowds-in-the-Loop for Cyber-Physical Systems},
@@ -133,6 +133,6 @@ PerceptiSync: Trustworthy Object Detection using Crowds-in-the-Loop for Cyber-Ph
   note      = {Forthcoming},
   publisher = {Association for Computing Machinery}
 }
-
+```
 
 
