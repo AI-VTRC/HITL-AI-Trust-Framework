@@ -124,14 +124,19 @@ If you use this framework in your work, please cite our paper:
 
 PerceptiSync: Trustworthy Object Detection using Crowds-in-the-Loop for Cyber-Physical Systems (2025)
 ```
-@article{perceptisync2026,
+@article{perceptisync2025,
   author    = {Matthew Wilchek and Minh Nguyen and Yingjie Wang and Kurt Luther and Feras A. Batarseh},
   title     = {PerceptiSync: Trustworthy Object Detection using Crowds-in-the-Loop for Cyber-Physical Systems},
   journal   = {ACM Transactions on Cyber-Physical Systems},
-  year      = {2026},
+  volume    = {1},
+  number    = {1},
+  pages     = {1--25},
   month     = {January},
-  note      = {Forthcoming},
-  publisher = {Association for Computing Machinery}
+  year      = {2025},
+  articleno = {1},
+  publisher = {Association for Computing Machinery},
+  doi       = {10.1145/3746644},
+  url       = {https://doi.org/10.1145/3746644}
 }
 ```
 
